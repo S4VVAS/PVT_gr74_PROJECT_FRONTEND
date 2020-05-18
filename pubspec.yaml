@@ -41,6 +41,8 @@ dependencies:
   firebase_analytics: ^5.0.2
   firebase_auth: ^0.14.0+5
   cloud_firestore: ^0.12.9+5
+  firebase_messaging: ^6.0.15
+  get_it: ^1.0.3
 
 
 dev_dependencies:
