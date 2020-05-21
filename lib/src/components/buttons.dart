@@ -58,7 +58,7 @@ class SignOutButton extends StatelessWidget {
             Navigator.pushNamedAndRemoveUntil(context, '/welcome', ModalRoute.withName('/'));
           });
         } catch (e) {
-          print(e);
+          print('Could not sign out!\n' + e);
         }
       },
     );

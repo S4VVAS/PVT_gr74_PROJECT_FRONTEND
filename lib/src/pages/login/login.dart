@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/pages/pages.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-//final GoogleSignIn _googleSignIn = GoogleSignIn();
+final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -292,15 +294,16 @@ class _OtherProvidersSignInSectionState
   final TextEditingController _tokenController = TextEditingController();
 
   final facebookLogin = FacebookLogin();
+  //final googleLogin = GoogleLogin();
 
   String _message = '';
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        _facebookButton(),
+        FacebookSignInButton(onPressed: _signInWithFacebook),
         Container(
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -308,9 +311,42 @@ class _OtherProvidersSignInSectionState
             _message,
             style: TextStyle(color: Colors.red),
           ),
-        )
+        ),
+        GoogleSignInButton(onPressed: _signInWithGoogle)
       ],
     );
+  }
+
+  void _signInWithGoogle() async {
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth =
+    await googleUser.authentication;
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    final FirebaseUser user =
+        (await _auth.signInWithCredential(credential)).user;
+    assert(user.email != null);
+    assert(user.displayName != null);
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
+
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+    setState(() {
+      if (user != null) {
+        _message = 'Successfully signed in with Google.\n' +
+            'id: ' +
+            user.uid +
+            "\nname: " +
+            user.displayName;
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/home', ModalRoute.withName('/'));
+      } else {
+        _message = 'Failed to sign in with Google. ';
+      }
+    });
   }
 
   void _signInWithFacebook() async {
@@ -349,7 +385,7 @@ class _OtherProvidersSignInSectionState
 
         break;
       case FacebookLoginStatus.cancelledByUser:
-        //TODO: add snackbar error message to user
+      //TODO: add snackbar error message to user
         print(FacebookLoginStatus.cancelledByUser.toString());
         break;
       case FacebookLoginStatus.error:
@@ -357,8 +393,8 @@ class _OtherProvidersSignInSectionState
         break;
     }
   }
-
-  Widget _facebookButton() {
+}
+/*  Widget _facebookButton() {
     return InkWell(
         onTap: () {
           debugPrint('Facebook button pressed');
@@ -384,4 +420,101 @@ class _OtherProvidersSignInSectionState
           ),
         ));
   }
+}*/
+
+/*class _GoogleSignInSection extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _GoogleSignInSectionState();
 }
+
+class _GoogleSignInSectionState extends State<_GoogleSignInSection> {
+  bool _success;
+  String _userID;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Container(
+          child: const Text('Test sign in with Google'),
+          padding: const EdgeInsets.all(16),
+          alignment: Alignment.center,
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          alignment: Alignment.center,
+          child: RaisedButton(
+            onPressed: () async {
+              _signInWithGoogle();
+            },
+            child: const Text('Sign in with Google'),
+          ),
+        ),
+        Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            _success == null
+                ? ''
+                : (_success
+                ? 'Successfully signed in, uid: ' + _userID
+                : 'Sign in failed'),
+            style: TextStyle(color: Colors.red),
+          ),
+        )
+      ],
+    );
+  }
+
+  // Example code of how to sign in with google.
+  void _signInWithGoogle() async {
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+    assert(user.email != null);
+    assert(user.displayName != null);
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
+
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+    setState(() {
+      if (user != null) {
+        _success = true;
+        _userID = user.uid;
+      } else {
+        _success = false;
+      }
+    });
+  }*/
+
+/*  Widget _googleButton() {
+    return InkWell(
+        onTap: () {
+          debugPrint('Facebook button pressed');
+          _signInWithGoogle();
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.symmetric(vertical: 15),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            image: DecorationImage(image: AssetImage('assets/fbBtn.png')),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                  color: Colors.grey.shade200,
+                  offset: Offset(2, 4),
+                  blurRadius: 5,
+                  spreadRadius: 2)
+            ],
+          ),
+          child: Text(
+            '',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
+        ));
+  }
+}*/
