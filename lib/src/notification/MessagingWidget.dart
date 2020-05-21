@@ -1,7 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:history_go/src/pages/Message.dart';
-import 'package:history_go/src/pages/Messaging.dart';
+import 'file:///C:/Users/svant/Desktop/PVT_gr74_PROJECT_FRONTEND/lib/src/Notification/Message.dart';
+import 'package:history_go/src/notification/Messaging.dart';
 
 
 class MessagingWidget extends StatefulWidget {
