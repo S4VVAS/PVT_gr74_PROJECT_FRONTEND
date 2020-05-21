@@ -29,11 +29,11 @@ class MissionsPage extends StatelessWidget {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (BuildContext context) => NewMissionPage()));
           }, color: Colors.red[200]),
-          Button('Runda 2', onPressed: () {}, color: Colors.red[200]),
-          Button('Runda 3', onPressed: () {}, color: Colors.red[200]),
-          Button('Runda 4', onPressed: () {}, color: Colors.red[200]),
-          Button('Runda 5', onPressed: () {}, color: Colors.red[200]),
-          Button('Runda 6', onPressed: () {}, color: Colors.red[200]),
+          Button('Runda 2', color: Colors.red[200]),
+          Button('Runda 3', color: Colors.red[200]),
+          Button('Runda 4', color: Colors.red[200]),
+          Button('Runda 5', color: Colors.red[200]),
+          Button('Runda 6', color: Colors.red[200]),
         ],
       ),
     );
@@ -42,7 +42,7 @@ class MissionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar("Uppdrag"),
+      appBar: CustomAppBar(text: "Uppdrag"),
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -57,16 +57,8 @@ class MissionsPage extends StatelessWidget {
             children: <Widget>[
               _missionListView(context),
               SizedBox(height: 8.0),
-              Button(
-                'Skapa nytt uppdrag',
-                onPressed: () => Navigator.of(context).pushNamed("/someRoute"),
-                color: Colors.deepOrangeAccent,
-              ),
-              Button(
-                'Utförda uppdrag',
-                onPressed: () => Navigator.of(context).pushNamed("/someRoute"),
-                color: Colors.red,
-              ),
+              Button.pushRoute('Skapa nytt uppdrag', "/someRoute", color: Colors.deepOrangeAccent),
+              Button.pushRoute('Utförda uppdrag', "/someRoute", color: Colors.red),
               Expanded(
                 flex: 2,
                 child: SizedBox(),

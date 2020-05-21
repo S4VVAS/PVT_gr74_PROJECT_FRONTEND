@@ -2,11 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Button extends StatelessWidget {
-  Button(this.text, {this.onPressed, this.color});
-  
+  Button(this.text, {this.onPressed, this.route, this.color});
+
+  Button.pushRoute(String text, String route, {Color color})
+      : this(text, onPressed: () {}, route: route, color: color);
+
   final String text;
   final GestureTapCallback onPressed;
   final Color color;
+  final String route;
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +18,16 @@ class Button extends StatelessWidget {
       padding: EdgeInsets.all(8.0),
       child: RawMaterialButton(
         elevation: 4.0,
-        fillColor: color??Theme.of(context).buttonColor,
+        fillColor: color ?? Theme.of(context).buttonColor,
         splashColor: Theme.of(context).splashColor,
-        onPressed: onPressed ??() {},
+        onPressed: () {
+          print(onPressed);
+          if (route != null) {
+            Navigator.of(context).pushNamed(route);
+          } else if (onPressed != null)
+            return onPressed.call();
+          return;
+        },
         shape: ContinuousRectangleBorder(
           borderRadius: BorderRadius.circular(18),
         ),
@@ -42,8 +53,9 @@ class SignOutButton extends StatelessWidget {
       text,
       onPressed: () {
         try {
+          print("JAG HAR TRYCKTS");
           _auth.signOut().whenComplete(() {
-            Navigator.maybePop(context);
+            Navigator.pushNamedAndRemoveUntil(context, '/welcome', ModalRoute.withName('/'));
           });
         } catch (e) {
           print(e);

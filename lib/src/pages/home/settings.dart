@@ -14,17 +14,17 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar("Inställningar"),
+      appBar: CustomAppBar(text: "Inställningar"),
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(28.0),
           child: Column(
             children: <Widget>[
-              Button('Aviseringar', onPressed: () {}),
-              Button('Konto', onPressed: () {}),
-              Button('Sekretess', onPressed: () {}),
-              Button('Säkerhet', onPressed: () {}),
+              Button('Aviseringar'),
+              Button('Konto'),
+              Button('Sekretess'),
+              Button('Säkerhet'),
               SignOutButton(text: 'Logga ut'),
             ],
           ),

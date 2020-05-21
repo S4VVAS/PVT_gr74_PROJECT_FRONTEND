@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
+import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:history_go/src/models/place.dart';
 
 class InfoPage extends StatelessWidget {
@@ -65,7 +66,7 @@ class InfoPage extends StatelessWidget {
       return noPlacePage(context);
     else {
       return Scaffold(
-        appBar: AppBar(),
+        appBar: CustomAppBar(),
         body: Center(
           child: Container(
             width: MediaQuery.of(context).size.width,
