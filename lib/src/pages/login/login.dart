@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/pages/pages.dart';
@@ -46,11 +46,6 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
-  }
-
-  _logout() {
-    _auth.signOut();
-    setState(() {});
   }
 
   Widget _createAccountLabel() {
@@ -303,16 +298,22 @@ class _OtherProvidersSignInSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        FacebookSignInButton(onPressed: _signInWithFacebook),
+        SignInButton(
+          Buttons.Facebook,
+          onPressed: _signInWithFacebook,
+        ),
+        SignInButton(
+          Buttons.Google,
+          onPressed: _signInWithGoogle,
+        ),
         Container(
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
             _message,
             style: TextStyle(color: Colors.red),
           ),
         ),
-        GoogleSignInButton(onPressed: _signInWithGoogle)
       ],
     );
   }
@@ -320,7 +321,7 @@ class _OtherProvidersSignInSectionState
   void _signInWithGoogle() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
-    await googleUser.authentication;
+        await googleUser.authentication;
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -385,7 +386,7 @@ class _OtherProvidersSignInSectionState
 
         break;
       case FacebookLoginStatus.cancelledByUser:
-      //TODO: add snackbar error message to user
+        //TODO: add snackbar error message to user
         print(FacebookLoginStatus.cancelledByUser.toString());
         break;
       case FacebookLoginStatus.error:
