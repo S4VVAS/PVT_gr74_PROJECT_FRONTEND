@@ -36,6 +36,11 @@ class Place {
     this.entries.forEach((entry) {images.add(entry.img);});
     return images;
   }
+
+  @override
+  String toString() {
+    return "Place position: $position, entries:\n$entries";
+  }
 }
 
 class Entries {
@@ -64,50 +69,10 @@ class Entries {
     data['desc'] = this.desc;
     return data;
   }
-}
-
-/*  Place({this.position, this.entries});
-
-  factory Place.fromJson(var json) {
-    return Place(
-      position: _getPos(json['lat'], json['lon']),
-      entries: _getEntries(json['entries'])
-    );
-  }
-
-  static List<PlaceEntry> _getEntries(List<dynamic> json) {
-    List<PlaceEntry> entries = new List();
-    for (var entry in json) {
-      entries.add(PlaceEntry.fromJson(entry));
-    }
-    return entries;
-  }
 
   @override
   String toString() {
-    return "Place position: ${position.toString()} \nEntries:\n${entries.toString()}";
+    return "$title, $desc, $date";
   }
 }
 
-class PlaceEntry {
-  final String title;
-  final String description;
-  final Image image;
-  final String date;
-
-  PlaceEntry({this.title, this.description, this.image, this.date});
-
-  factory PlaceEntry.fromJson(var json) {
-    return PlaceEntry(
-      title: json['title'],
-      description: json['desc'],
-      image: Image.network(json['img']),
-      date: json['date']
-    );
-  }
-
-  @override
-  String toString() {
-    return "Entry: ${this.title}, ${this.description}}, ${this.date}";
-  }
-}*/

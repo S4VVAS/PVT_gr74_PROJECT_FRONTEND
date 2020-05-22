@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:history_go/src/components/custom_app_bar.dart';
+import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/models/user.dart';
 
 
@@ -43,13 +45,8 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        centerTitle: true,
-        title: Text(
-          UserInfo.name ?? 'Profil',
-          style: TextStyle(fontSize: 26.0, letterSpacing: 0.8),
-        ),
+      appBar: CustomAppBar(
+        text: UserInfo.name ?? "Profil",
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -66,18 +63,13 @@ class ProfilePage extends StatelessWidget {
         child: Container(
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(28.0),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              Colors.blue,
-              Colors.lightBlueAccent,
-            ]),
-          ),
+          color: Theme.of(context).backgroundColor,
           child: Column(
             children: <Widget>[
               _profilePicture(),
-              _profileButton('Mina vänner'),
-              _profileButton('Mina badges'),
-              _profileButton('Mina bidrag'),
+              Button('Mina vänner'),
+              Button('Mina badges'),
+              Button('Mina bidrag'),
             ],
           ),
         ),

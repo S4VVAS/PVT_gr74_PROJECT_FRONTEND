@@ -1,27 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:history_go/src/pages/pages.dart';
+import 'package:history_go/src/components/custom_app_bar.dart';
 
-class NewMission extends StatelessWidget {
-
-  Widget _appBar(String title) {
-    return AppBar(
-      backgroundColor: Colors.blue,
-      title: Text(
-        title,
-        style: TextStyle(fontSize: 26.0),
-      ),
-      actions: <Widget>[],
-    );
-  }
-
+class NewMissionPage extends StatelessWidget {
   Widget _infoPicture() {
     return Hero(
       tag: 'infoPic',
       child: SizedBox(
           height: 350.0,
           width: 280.0,
-          child: Image.asset('',
-              fit: BoxFit.cover)
+          //child: Image.asset('',  fit: BoxFit.cover)
       ),
     );
   }
@@ -63,7 +50,7 @@ class NewMission extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar("Stockholms blodbad"),
+      appBar: CustomAppBar(text: "Stockholms blodbad"),
       body: Center(
         child: Container(
           width: MediaQuery

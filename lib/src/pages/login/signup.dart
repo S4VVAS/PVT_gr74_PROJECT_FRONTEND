@@ -1,81 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:history_go/src/components/buttons.dart';
+import 'package:history_go/src/components/title_logo.dart';
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class SignUpPage extends StatefulWidget {
-  SignUpPage({Key key, this.title}) : super(key: key);
+  SignUpPage({Key key}) : super(key: key);
 
-  final String title;
+  final String title = 'Registration';
 
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  Widget _backButton() {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Row(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(left: 0, top: 10, bottom: 10),
-              child: Icon(Icons.keyboard_arrow_left, color: Colors.black),
-            ),
-            Text('Back',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500))
-          ],
-        ),
-      ),
-    );
-  }
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  FocusNode focus;
 
-  Widget _entryField(String title, {bool isPassword = false}) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          TextField(
-              obscureText: isPassword,
-              decoration: InputDecoration(
-                  border: InputBorder.none,
-                  fillColor: Color(0xfff3f3f4),
-                  filled: true))
-        ],
-      ),
-    );
+  bool _success;
+  String _userEmail;
+
+  @override
+  void initState() {
+    super.initState();
+
+    focus = FocusNode();
   }
 
   Widget _submitButton() {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(vertical: 15),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-                color: Colors.grey.shade200,
-                offset: Offset(2, 4),
-                blurRadius: 5,
-                spreadRadius: 2)
-          ],
-          gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Color(0xfffbb448), Color(0xfff7892b)])),
-      child: Text(
-        'Register Now',
-        style: TextStyle(fontSize: 20, color: Colors.white),
+    return InkWell(
+      onTap: () async {
+        if (_formKey.currentState.validate()) {
+          _register();
+        }
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                  color: Colors.grey.shade200,
+                  offset: Offset(2, 4),
+                  blurRadius: 5,
+                  spreadRadius: 2)
+            ],
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [Color(0xfffbb448), Color(0xfff7892b)])),
+        child: Text(
+          'Register Now',
+          style: TextStyle(fontSize: 20, color: Colors.white),
+        ),
       ),
     );
   }
@@ -111,40 +93,74 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _title() {
-    return RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(
-          text: 'History ',
-          style: TextStyle(
-              color: Colors.orange, fontSize: 40, fontWeight: FontWeight.w700),
-          children: [
-            TextSpan(
-              text: 'Go',
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 40,
-                  fontWeight: FontWeight.w900),
-            ),
-            TextSpan(
-              text: '!',
-              style: TextStyle(
-                  color: Colors.deepOrange,
-                  fontSize: 40,
-                  fontWeight: FontWeight.w900),
-            ),
-          ]),
+  Widget _emailPasswordForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TextFormField(
+            controller: _emailController,
+            decoration: const InputDecoration(labelText: 'Email'),
+            textInputAction: TextInputAction.next,
+            keyboardType: TextInputType.emailAddress,
+            onFieldSubmitted: (v) {
+              FocusScope.of(context).requestFocus(focus);
+            },
+            validator: (String value) {
+              if (value.isEmpty) {
+                return 'Please enter some text';
+              } /*else if (!Validator.validateEmail(value)) {
+                return 'Please enter a valid email';
+              }*/
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _passwordController,
+            decoration: const InputDecoration(labelText: 'Password'),
+            focusNode: focus,
+            obscureText: true,
+            validator: (String value) {
+              if (value.isEmpty) {
+                return 'Please enter some text';
+              } /*else if (!Validator.validatePassword(value)) {
+                return 'Password must contain minimum 8 characters \n'+
+                      'At least one uppercase letter, '+ 
+                      'one lowercase letter\nand one digit\n'+
+                      'Can not contain special characters';
+              }*/
+              return null;
+            },
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: Text(_success == null
+                ? ''
+                : (_success
+                    ? 'Successfully registered ' + _userEmail
+                    : 'Registration failed')),
+          )
+        ],
+      ),
     );
   }
 
-  Widget _emailPasswordWidget() {
-    return Column(
-      children: <Widget>[
-        _entryField("Username"),
-        _entryField("Email"),
-        _entryField("Password", isPassword: true),
-      ],
-    );
+  void _register() async {
+    
+    final FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
+      email: _emailController.text,
+      password: _passwordController.text,
+    ))
+        .user;
+    if (user != null) {
+      setState(() {
+        _success = true;
+        _userEmail = user.email;
+      });
+    } else {
+      _success = false;
+    }
   }
 
   @override
@@ -162,20 +178,20 @@ class _SignUpPageState extends State<SignUpPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Expanded(
-                  flex: 3,
+                  flex: 2,
                   child: SizedBox(),
                 ),
-                _title(),
+                TitleLogo(),
                 SizedBox(
                   height: 50,
                 ),
-                _emailPasswordWidget(),
+                _emailPasswordForm(),
                 SizedBox(
                   height: 20,
                 ),
                 _submitButton(),
                 Expanded(
-                  flex: 2,
+                  flex: 4,
                   child: SizedBox(),
                 )
               ],
@@ -185,9 +201,37 @@ class _SignUpPageState extends State<SignUpPage> {
             alignment: Alignment.bottomCenter,
             child: _loginAccountLabel(),
           ),
-          Positioned(top: 40, left: 0, child: _backButton()),
+          Positioned(
+              top: 40,
+              left: 0,
+              child: CustomBackButton(
+                onPressed: () => Navigator.pop(context),
+              )),
         ],
       ),
     )));
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    focus.dispose();
+    super.dispose();
+  }
+}
+
+class Validator {
+  static final RegExp regExpPassword = new RegExp(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$");
+  static final RegExp regExpEmail = new RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$");
+
+  static bool validatePassword(String password) {
+    if (password == null) return false;
+    return regExpPassword.hasMatch(password);
+  }
+
+  static bool validateEmail(String email) {
+    if (email == null) return false;
+    return regExpEmail.hasMatch(email);
   }
 }

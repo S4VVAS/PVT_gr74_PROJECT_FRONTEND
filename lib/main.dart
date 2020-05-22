@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:history_go/routes.dart';
 import 'package:history_go/src/theme/style.dart';
@@ -8,6 +9,7 @@ class MyApp extends StatelessWidget {
   //This is the root of the application
   @override
   Widget build(BuildContext context) {
+    FirebaseUser user;
     return MaterialApp(
       title: 'History Go!',
       theme: appTheme(),
