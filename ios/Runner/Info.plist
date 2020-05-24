@@ -45,5 +45,9 @@
   	<string>This app needs your location to test the location feature of the Google Maps location picker plugin.</string>
   	<key>io.flutter.embedded_views_preview</key>
   	<true/>
+  	<key>NSPhotoLibraryUsageDescription</key>
+  	<string>This app access to your photos so you can pick a profile picture.</string>
+    <key>NSCameraUsageDescription</key>
+  	<string>This app access to your camera so you can take a profile picture.</string>
 </dict>
 </plist>

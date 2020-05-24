@@ -14,7 +14,7 @@ description: The history revolution in Stockholm, let's Go!
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -29,6 +29,7 @@ dependencies:
   google_fonts: ^1.1.0
   carousel_pro: ^1.0.0
   permission_handler: ^5.0.0+hotfix.4
+  image_picker: ^0.6.6+4
 
   flutter_facebook_login: ^1.1.1
   google_sign_in: ^4.5.1
@@ -41,7 +42,7 @@ dependencies:
   firebase_analytics: ^5.0.2
   firebase_auth: ^0.14.0+5
   cloud_firestore: ^0.12.9+5
-
+  firebase_storage: 3.0.4
 
 dev_dependencies:
   flutter_test:
