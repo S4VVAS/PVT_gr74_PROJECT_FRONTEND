@@ -15,13 +15,12 @@ class Button extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: RawMaterialButton(
         elevation: 4.0,
         fillColor: color ?? Theme.of(context).buttonColor,
         splashColor: Theme.of(context).splashColor,
         onPressed: () {
-          print(onPressed);
           if (route != null) {
             Navigator.of(context).pushNamed(route);
           } else if (onPressed != null)
@@ -32,7 +31,7 @@ class Button extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
         ),
         constraints: BoxConstraints(
-          minWidth: 330.0,
+          minWidth: 260.0,
           minHeight: 50.0,
         ),
         textStyle: Theme.of(context).textTheme.button,
@@ -53,14 +52,15 @@ class SignOutButton extends StatelessWidget {
       text,
       onPressed: () {
         try {
-          print("JAG HAR TRYCKTS");
           _auth.signOut().whenComplete(() {
+            print('Signed out Successfully');
             Navigator.pushNamedAndRemoveUntil(context, '/welcome', ModalRoute.withName('/'));
           });
         } catch (e) {
-          print('Could not sign out!\n' + e);
+          print('Could not sign out\n' + e);
         }
       },
+      color: Colors.redAccent,
     );
   }
 }

@@ -45,7 +45,7 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> updatePlaces() async {
     List<Place> _updatedPlaces =
-        await PlaceRepository().getPlaces(await _getUserPosition());
+        await PlaceRepository().getPlaces(_initPosition ?? await _getUserPosition());
     if (this.mounted) {
       setState(() {
         places = _updatedPlaces;
@@ -72,7 +72,7 @@ class _MapPageState extends State<MapPage> {
       ),
       child: IconButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/settings");
+          Scaffold.of(context).openEndDrawer();
         },
         padding: EdgeInsets.zero,
         icon: Icon(

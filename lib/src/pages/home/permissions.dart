@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionPage extends StatefulWidget {
@@ -13,8 +14,9 @@ class _PermissionPageState extends State<PermissionPage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Behörigheter'),
+        appBar: CustomAppBar(
+          text: 'Behörigheter',
+          backButton: true,
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.settings),

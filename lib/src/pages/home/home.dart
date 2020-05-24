@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:history_go/src/pages/pages.dart';
+import 'package:history_go/src/components/drawer.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -71,6 +72,8 @@ class _HomePageState extends State<HomePage>
           SearchPage(),
         ],
       ),
+      endDrawer: CustomDrawer(),
+      endDrawerEnableOpenDragGesture: false,
     );
   }
 }
