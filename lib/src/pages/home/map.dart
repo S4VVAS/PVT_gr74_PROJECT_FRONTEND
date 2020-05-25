@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/services/place_repository.dart';
+import 'package:history_go/src/components/buttons.dart';
 
 /*const double CAMERA_TILT = 80;
 const double CAMERA_BEARING = 30;*/
@@ -29,11 +30,11 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    updatePlaces();
+    _getUserPosition().whenComplete(() => updatePlaces());
   }
 
     Future<void> updatePlaces() async {
-    List<Place> _updatedPlaces = await PlaceRepository().getPlaces(_userPosition ?? await _getUserPosition());
+    List<Place> _updatedPlaces = await PlaceRepository().getPlaces(_userPosition);
     if (this.mounted) {
       setState(() {
         places = _updatedPlaces;
@@ -43,52 +44,23 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<LatLng> _getUserPosition() async {
-    Position position = await Geolocator().getCurrentPosition();
+    debugPrint("User position requested");
+    Position position = await Geolocator().getCurrentPosition().whenComplete(() => debugPrint("User position acquired"));
 
     if (this.mounted) {
       setState(() {
         _userPosition = LatLng(position.latitude, position.longitude);
-        print('User position: ${_userPosition.toString()}');
+        debugPrint('User position: ${_userPosition.toString()}');
       });
     }
 
     return _userPosition;
   }
 
-  //move to components/buttons.dart (?)
-  Widget _settingsButton() {
-    return Container(
-      height: 32,
-      width: 32,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            offset: Offset(2, 2),
-            blurRadius: 2,
-            spreadRadius: 1,
-          )
-        ],
-      ),
-      child: IconButton(
-        onPressed: () {
-          Scaffold.of(context).openEndDrawer();
-        },
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          Icons.settings,
-          color: Colors.grey[800],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _userPosition == null
+    return Center(
+      child: _userPosition == null
           ? Container(
               child: Center(
                 child: Text(
@@ -118,7 +90,7 @@ class _MapPageState extends State<MapPage> {
                     markers: Set<Marker>.of(markers.values),
                     myLocationButtonEnabled: false,
                     myLocationEnabled: true,
-                    zoomControlsEnabled: false,
+                    zoomControlsEnabled: true,
                     onCameraIdle: _onCameraIdle,
                   ),
                   Padding(
@@ -128,7 +100,7 @@ class _MapPageState extends State<MapPage> {
                       alignment: Alignment.topRight,
                       child: Column(
                         children: <Widget>[
-                          _settingsButton(),
+                          MapSettingsButton(),
                         ],
                       ),
                     ),
@@ -191,7 +163,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _onCameraIdle() {
-    updatePlaces();
+    //updatePlaces();
     print('idling...');
   }
 }

@@ -90,3 +90,37 @@ class CustomBackButton extends StatelessWidget {
     );
   }
 }
+
+class MapSettingsButton extends StatelessWidget {
+  MapSettingsButton({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 32,
+      width: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            offset: Offset(2, 2),
+            blurRadius: 2,
+            spreadRadius: 1,
+          )
+        ],
+      ),
+      child: IconButton(
+        onPressed: () {
+          Scaffold.of(context).openEndDrawer();
+        },
+        padding: EdgeInsets.zero,
+        icon: Icon(
+          Icons.settings,
+          color: Colors.grey[800],
+        ),
+      ),
+    );
+  }
+}
