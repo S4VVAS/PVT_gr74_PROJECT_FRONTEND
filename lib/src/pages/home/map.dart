@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/services/place_repository.dart';
 import 'package:history_go/src/components/buttons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /*const double CAMERA_TILT = 80;
 const double CAMERA_BEARING = 30;*/
@@ -18,7 +19,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  Completer<GoogleMapController> _controller = new Completer();
+  GoogleMapController _controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 
   List<Place> places = new List<Place>();
@@ -26,20 +27,51 @@ class _MapPageState extends State<MapPage> {
   MarkerId selectedMarker;
 
   static LatLng _userPosition;
+  static LatLng _lastCall;
+
+  double placeSeenColor = BitmapDescriptor.hueYellow;
+  double placeNotSeenColor = BitmapDescriptor.hueGreen;
+
+  Geolocator _geolocator = Geolocator();
+
+  final double CAMERA_ZOOM = 17.5;
 
   @override
   void initState() {
     super.initState();
-    _getUserPosition().whenComplete(() => updatePlaces());
+    _lastCall = new LatLng(0, 0);
+    _geolocator.getPositionStream(
+        LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10))
+        .listen((Position position) async {
+          _userPosition = _toLatLng(position);
+          updatePlaces();
+          _controller?.moveCamera(CameraUpdate.newCameraPosition(
+              CameraPosition(target: _userPosition, zoom: CAMERA_ZOOM)));
+    });
   }
 
-    Future<void> updatePlaces() async {
-    List<Place> _updatedPlaces = await PlaceRepository().getPlaces(_userPosition);
-    if (this.mounted) {
-      setState(() {
-        places = _updatedPlaces;
-        setMarkers();
-      });
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> updatePlaces() async {
+      double distance = await Geolocator().distanceBetween(
+          _lastCall.latitude, _lastCall.longitude,
+          _userPosition.latitude, _userPosition.longitude
+      );
+      print(distance);
+    if (distance > 100) {
+      _lastCall = _userPosition;
+      List<Place> _updatedPlaces = await PlaceRepository().getPlaces(
+          _userPosition);
+      print(this.mounted.toString());
+      if (this.mounted) {
+        setState(() {
+          places = _updatedPlaces;
+          setMarkers();
+        });
+      }
     }
   }
 
@@ -56,8 +88,6 @@ class _MapPageState extends State<MapPage> {
 
     return _userPosition;
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -78,12 +108,12 @@ class _MapPageState extends State<MapPage> {
                   GoogleMap(
                     onMapCreated: (GoogleMapController controller) {
                       setState(() {
-                        _controller.complete(controller);
+                        _controller = controller;
                       });
                     },
                     initialCameraPosition: CameraPosition(
                       target: _userPosition,
-                      zoom: 14.4,
+                      zoom: CAMERA_ZOOM,
                       //tilt: CAMERA_TILT,
                       //bearing: CAMERA_BEARING,
                     ),
@@ -93,7 +123,6 @@ class _MapPageState extends State<MapPage> {
                     myLocationButtonEnabled: false,
                     myLocationEnabled: true,
                     zoomControlsEnabled: true,
-                    onCameraIdle: _onCameraIdle,
                     scrollGesturesEnabled: false,
                     zoomGesturesEnabled: false,
                   ),
@@ -115,20 +144,13 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void _onMarkerTapped(MarkerId markerId, Place place) {
+  void _onMarkerTapped(MarkerId markerId) {
     final Marker tappedMarker = markers[markerId];
     if (tappedMarker != null) {
       setState(() {
-        if (markers.containsKey(selectedMarker)) {
-          final Marker resetOld = markers[selectedMarker].copyWith(
-              iconParam: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueGreen));
-          markers[selectedMarker] = resetOld;
-        }
-        selectedMarker = markerId;
         final Marker newMarker = tappedMarker.copyWith(
           iconParam: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueYellow,
+            placeSeenColor,
           ),
         );
         markers[markerId] = newMarker;
@@ -136,23 +158,23 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  void addMarker(Place place) {
+  void addMarker(Place place) async {
     final String markerIdVal = 'marker_id_$_markerIdCounter';
     _markerIdCounter++;
     final MarkerId markerId = MarkerId(markerIdVal);
 
+    bool visited = await hasVisited(place.position);
+    double iconColor = visited ? placeSeenColor : placeNotSeenColor;
+
     final Marker marker = Marker(
         markerId: markerId,
         position: place.position,
-        infoWindow: InfoWindow(
-            //TODO: ska infowindow visa titel och beskrivning för första entryn i platsen??
-            title: place.entries[0].title,
-            snippet: place.entries[0].desc ?? 'saknar beskrivning',
-            onTap: () =>
-                Navigator.pushNamed(context, "/info", arguments: place)),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        icon: BitmapDescriptor.defaultMarkerWithHue(iconColor),
+        consumeTapEvents: true,
         onTap: () {
-          _onMarkerTapped(markerId, place);
+            _onMarkerTapped(markerId);
+            saveAsVisited(place.position);
+            Navigator.pushNamed(context, "/info", arguments: place);
         });
     setState(() {
       markers[markerId] = marker;
@@ -161,13 +183,26 @@ class _MapPageState extends State<MapPage> {
 
   void setMarkers() {
     debugPrint("Setting markers");
+    markers.clear();
     for (Place p in places) {
       addMarker(p);
     }
   }
 
-  void _onCameraIdle() {
-    //updatePlaces();
-    print('idling...');
+  void saveAsVisited(LatLng position) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Value används ej, därav -> "".
+    await prefs.setString(position.toString(), "");
   }
+
+  Future<bool> hasVisited(LatLng position) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool visited = prefs.containsKey(position.toString());
+    return Future<bool>.value(visited);
+  }
+
+  LatLng _toLatLng(Position p) {
+    return LatLng(p.latitude, p.longitude);
+  }
+
 }
