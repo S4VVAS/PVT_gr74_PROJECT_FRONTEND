@@ -57,6 +57,8 @@ class _MapPageState extends State<MapPage> {
     return _userPosition;
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -92,6 +94,8 @@ class _MapPageState extends State<MapPage> {
                     myLocationEnabled: true,
                     zoomControlsEnabled: true,
                     onCameraIdle: _onCameraIdle,
+                    scrollGesturesEnabled: false,
+                    zoomGesturesEnabled: false,
                   ),
                   Padding(
                     padding:
