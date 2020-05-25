@@ -14,8 +14,8 @@ class PlaceRepository {
     for (var place in response) {
       places.add(Place.fromJson(place));
     }
-    debugPrint("getPlaces returned: ");
-    places.forEach((p) => print(p.toString()));
+    debugPrint("getPlaces returned ${places.length} places");
+    
     return places;
   }
 }
