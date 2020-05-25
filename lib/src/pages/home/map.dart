@@ -34,7 +34,7 @@ class _MapPageState extends State<MapPage> {
 
   Geolocator _geolocator = Geolocator();
 
-  final double CAMERA_ZOOM = 17.5;
+  double _zoom = 17.0;
 
   @override
   void initState() {
@@ -43,16 +43,13 @@ class _MapPageState extends State<MapPage> {
     _geolocator.getPositionStream(
         LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10))
         .listen((Position position) async {
+          //zoom = await _controller.getZoomLevel();
           _userPosition = _toLatLng(position);
+          //_controller?.getVisibleRegion()?.then((value) => print(value.toString()));
           updatePlaces();
           _controller?.moveCamera(CameraUpdate.newCameraPosition(
-              CameraPosition(target: _userPosition, zoom: CAMERA_ZOOM)));
+              CameraPosition(target: _userPosition, zoom: await _controller.getZoomLevel() )));
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   Future<void> updatePlaces() async {
@@ -65,7 +62,7 @@ class _MapPageState extends State<MapPage> {
       _lastCall = _userPosition;
       List<Place> _updatedPlaces = await PlaceRepository().getPlaces(
           _userPosition);
-      print(this.mounted.toString());
+      print(this.toDiagnosticsNode().toString() + " \nis mounted:" + this.mounted.toString());
       if (this.mounted) {
         setState(() {
           places = _updatedPlaces;
@@ -73,20 +70,6 @@ class _MapPageState extends State<MapPage> {
         });
       }
     }
-  }
-
-  Future<LatLng> _getUserPosition() async {
-    debugPrint("User position requested");
-    Position position = await Geolocator().getCurrentPosition().whenComplete(() => debugPrint("User position acquired"));
-
-    if (this.mounted) {
-      setState(() {
-        _userPosition = LatLng(position.latitude, position.longitude);
-        debugPrint('User position: ${_userPosition.toString()}');
-      });
-    }
-
-    return _userPosition;
   }
 
   @override
@@ -113,7 +96,7 @@ class _MapPageState extends State<MapPage> {
                     },
                     initialCameraPosition: CameraPosition(
                       target: _userPosition,
-                      zoom: CAMERA_ZOOM,
+                      zoom: _zoom,
                       //tilt: CAMERA_TILT,
                       //bearing: CAMERA_BEARING,
                     ),
@@ -189,6 +172,10 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  //TODO: saveAsVisited och hasVisited bör nog dels ligga i annan klass (user?)  
+  // och dels köras vid appstart eller  inloggning.
+  // Kanske går att använda userID från firebase-usern på något sätt så det blir
+  // unikt för användaren ist för devicen?
   void saveAsVisited(LatLng position) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // Value används ej, därav -> "".
