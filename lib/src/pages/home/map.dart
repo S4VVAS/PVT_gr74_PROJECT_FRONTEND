@@ -1,10 +1,12 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/services/place_repository.dart';
+
+/*const double CAMERA_TILT = 80;
+const double CAMERA_BEARING = 30;*/
 
 class MapPage extends StatefulWidget {
   MapPage({Key key, this.title}) : super(key: key);
@@ -22,7 +24,7 @@ class _MapPageState extends State<MapPage> {
   int _markerIdCounter = 1;
   MarkerId selectedMarker;
 
-  static LatLng _initPosition;
+  static LatLng _userPosition;
 
   @override
   void initState() {
@@ -30,22 +32,8 @@ class _MapPageState extends State<MapPage> {
     updatePlaces();
   }
 
-  Future<LatLng> _getUserPosition() async {
-    Position position = await Geolocator().getCurrentPosition();
-
-    if (this.mounted) {
-      setState(() {
-        _initPosition = LatLng(position.latitude, position.longitude);
-        print('User position: ${_initPosition.toString()}');
-      });
-    }
-
-    return _initPosition;
-  }
-
-  Future<void> updatePlaces() async {
-    List<Place> _updatedPlaces =
-        await PlaceRepository().getPlaces(await _getUserPosition());
+    Future<void> updatePlaces() async {
+    List<Place> _updatedPlaces = await PlaceRepository().getPlaces(_userPosition ?? await _getUserPosition());
     if (this.mounted) {
       setState(() {
         places = _updatedPlaces;
@@ -54,6 +42,20 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  Future<LatLng> _getUserPosition() async {
+    Position position = await Geolocator().getCurrentPosition();
+
+    if (this.mounted) {
+      setState(() {
+        _userPosition = LatLng(position.latitude, position.longitude);
+        print('User position: ${_userPosition.toString()}');
+      });
+    }
+
+    return _userPosition;
+  }
+
+  //move to components/buttons.dart (?)
   Widget _settingsButton() {
     return Container(
       height: 32,
@@ -72,7 +74,7 @@ class _MapPageState extends State<MapPage> {
       ),
       child: IconButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/settings");
+          Scaffold.of(context).openEndDrawer();
         },
         padding: EdgeInsets.zero,
         icon: Icon(
@@ -86,7 +88,7 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _initPosition == null
+      body: _userPosition == null
           ? Container(
               child: Center(
                 child: Text(
@@ -106,13 +108,18 @@ class _MapPageState extends State<MapPage> {
                       });
                     },
                     initialCameraPosition: CameraPosition(
-                      target: _initPosition,
+                      target: _userPosition,
                       zoom: 14.4,
+                      //tilt: CAMERA_TILT,
+                      //bearing: CAMERA_BEARING,
                     ),
                     mapType: MapType.normal,
+                    buildingsEnabled: true,
                     markers: Set<Marker>.of(markers.values),
                     myLocationButtonEnabled: false,
                     myLocationEnabled: true,
+                    zoomControlsEnabled: false,
+                    onCameraIdle: _onCameraIdle,
                   ),
                   Padding(
                     padding:
@@ -181,5 +188,10 @@ class _MapPageState extends State<MapPage> {
     for (Place p in places) {
       addMarker(p);
     }
+  }
+
+  void _onCameraIdle() {
+    updatePlaces();
+    print('idling...');
   }
 }

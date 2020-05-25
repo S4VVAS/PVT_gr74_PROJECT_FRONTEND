@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -8,7 +9,6 @@ import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/pages/pages.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -286,10 +286,8 @@ class _OtherProvidersSignInSection extends StatefulWidget {
 
 class _OtherProvidersSignInSectionState
     extends State<_OtherProvidersSignInSection> {
-  final TextEditingController _tokenController = TextEditingController();
-
   final facebookLogin = FacebookLogin();
-  //final googleLogin = GoogleLogin();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   String _message = '';
 
@@ -300,11 +298,17 @@ class _OtherProvidersSignInSectionState
       children: <Widget>[
         SignInButton(
           Buttons.Facebook,
-          onPressed: _signInWithFacebook,
+          onPressed: () {
+            _resetErrorMessage();
+            _signInWithFacebook();
+          },
         ),
         SignInButton(
           Buttons.Google,
-          onPressed: _signInWithGoogle,
+          onPressed: () {
+            _resetErrorMessage();
+            _signInWithGoogle();
+          },
         ),
         Container(
           alignment: Alignment.center,
@@ -326,28 +330,8 @@ class _OtherProvidersSignInSectionState
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    final FirebaseUser user =
-        (await _auth.signInWithCredential(credential)).user;
-    assert(user.email != null);
-    assert(user.displayName != null);
-    assert(!user.isAnonymous);
-    assert(await user.getIdToken() != null);
 
-    final FirebaseUser currentUser = await _auth.currentUser();
-    assert(user.uid == currentUser.uid);
-    setState(() {
-      if (user != null) {
-        _message = 'Successfully signed in with Google.\n' +
-            'id: ' +
-            user.uid +
-            "\nname: " +
-            user.displayName;
-        Navigator.pushNamedAndRemoveUntil(
-            context, '/home', ModalRoute.withName('/'));
-      } else {
-        _message = 'Failed to sign in with Google. ';
-      }
-    });
+    _signInHandler('Google', credential);
   }
 
   void _signInWithFacebook() async {
@@ -360,38 +344,56 @@ class _OtherProvidersSignInSectionState
           accessToken: result.accessToken.token,
         );
 
-        final FirebaseUser user =
-            (await _auth.signInWithCredential(credential)).user;
-
-        assert(user.email != null);
-        assert(user.displayName != null);
-        assert(!user.isAnonymous);
-        assert(await user.getIdToken() != null);
-
-        final FirebaseUser currentUser = await _auth.currentUser();
-        assert(user.uid == currentUser.uid);
-        setState(() {
-          if (user != null) {
-            _message = 'Successfully signed in with Facebook.\n' +
-                'id: ' +
-                user.uid +
-                "\nname: " +
-                user.displayName;
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/home', ModalRoute.withName('/'));
-          } else {
-            _message = 'Failed to sign in with Facebook. ';
-          }
-        });
+        _signInHandler('Facebook', credential);
 
         break;
       case FacebookLoginStatus.cancelledByUser:
-        //TODO: add snackbar error message to user
         print(FacebookLoginStatus.cancelledByUser.toString());
         break;
       case FacebookLoginStatus.error:
         print(result.errorMessage);
+        _setErrorMessage(result.errorMessage);
         break;
     }
+  }
+
+  void _signInHandler(String authProvider, AuthCredential credential) async {
+    try {
+      final FirebaseUser user =
+          (await _auth.signInWithCredential(credential)).user;
+
+      assert(user.email != null);
+      assert(user.displayName != null);
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
+
+      final FirebaseUser currentUser = await _auth.currentUser();
+      assert(user.uid == currentUser.uid);
+      if (user != null) {
+        setState(() {
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/home', ModalRoute.withName('/'));
+        });
+      } else {
+        _setErrorMessage('Failed to sign in with $authProvider.');
+      }
+    } on PlatformException catch (e) {
+      print(e);
+      _setErrorMessage(e.message);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _setErrorMessage(String message) {
+    if (message != null) {
+      setState(() {
+        _message = message;
+      });
+    }
+  }
+
+  void _resetErrorMessage() {
+    _setErrorMessage(' ');
   }
 }
