@@ -34,7 +34,7 @@ class MyHomePageState extends State<MyHomePage> {
         child: CircleAvatar(
           radius: 120.0,
           backgroundColor: Colors.transparent,
-          backgroundImage: UserInfo.img ?? AssetImage(''),
+          backgroundImage: UserInfo.img ?? AssetImage('assets/profil.png'),
         ),
       ),
     );
@@ -43,23 +43,7 @@ class MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      // Select an image from the camera or gallery
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.photo_camera),
-              onPressed: () => getImage(ImageSource.camera),
-            ),
-            IconButton(
-              icon: Icon(Icons.photo_library),
-              onPressed: () => getImage(ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-      body: ListView(
+      body: Column(
         children: <Widget>[
           if (image != null) ...[
             Hero(
@@ -80,18 +64,7 @@ class MyHomePageState extends State<MyHomePage> {
             Uploader(file: image)
           ]
           else ...[
-            Hero(
-              tag: 'profilBild',
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CircleAvatar(
-                  radius: 120.0,
-                  backgroundColor: Colors.transparent,
-                  backgroundImage: UserInfo.img ?? AssetImage('assets/kaknas.jpg'),
-                  //child: Image.file(image),
-                ),
-              ),
-            ),
+           _profilePicture(),
             Button('Mina vänner'),
             Button('Mina badges'),
             Button('Byt profilbild', onPressed: () { getImage(ImageSource.gallery);}),
@@ -103,28 +76,6 @@ class MyHomePageState extends State<MyHomePage> {
 }
 
 class ProfilePage extends StatelessWidget {
-
-  Widget _profileButton(String title) {
-    return Container(
-      width: 330.0,
-      height: 60.0,
-      padding: EdgeInsets.symmetric(vertical: 6.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        onPressed: () {
-          //Navigator.of(context).pushNamed();
-        },
-        color: Colors.lightBlueAccent,
-        child: Text(
-          title,
-          style: TextStyle(color: Colors.white),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +115,7 @@ class ProfilePage extends StatelessWidget {
 
 class _UploaderState extends State<Uploader> {
   final FirebaseStorage _storage =
-  FirebaseStorage(storageBucket: 'gs://fireship-lessons.appspot.com');
+  FirebaseStorage(storageBucket: 'gs://decent-trail-172514.appspot.com');
 
   StorageUploadTask _uploadTask;
 
