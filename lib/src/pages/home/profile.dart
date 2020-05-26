@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,6 +14,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
+    super.initState();
     _getPlaces();
   }
 
@@ -27,24 +29,15 @@ class _ProfilePageState extends State<ProfilePage> {
       );
   }
 
-  Future _getPlaces() async {
-    print('KÖRS');
+  Future<void> _getPlaces() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Set<String> keys = prefs.getKeys();
-    List<String> visitedPlaces;
-    print(keys);
-
-    if(keys.isEmpty) {
-      print('NULL');
-    }
+    List<String> visitedPlaces = new List<String>();
 
     for(String str in keys) {
-      print('HIYA');
       visitedPlaces.add(str);
     }
     places = visitedPlaces;
-
-    return places;
   }
 
   @override
@@ -84,7 +77,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               )
                   :
-              ListView.builder(itemCount: places.length, itemBuilder: (BuildContext ctxt, int index) {return new Text(places[index]);})
+                  Center(
+                    child: Text('Besökta platser: '),
+                  ),
+              ListView.builder(scrollDirection: Axis.vertical,
+                  shrinkWrap: true, itemCount: places.length, itemBuilder: (BuildContext ctxt, int index) {return new Button(places[index]);})
             ],
           ),
         ),
