@@ -19,6 +19,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  Completer<GoogleMapController> _completer = new Completer();
   GoogleMapController _controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 
@@ -32,59 +33,55 @@ class _MapPageState extends State<MapPage> {
   double placeSeenColor = BitmapDescriptor.hueYellow;
   double placeNotSeenColor = BitmapDescriptor.hueGreen;
 
+  StreamSubscription positionStream;
   Geolocator _geolocator = Geolocator();
   LocationOptions locationOptions = LocationOptions(
-      accuracy: LocationAccuracy.high, distanceFilter: 10, timeInterval: 5000);
+      accuracy: LocationAccuracy.high, distanceFilter: 10);
 
   double _zoom = 17.0;
-  bool firstCall = true;
 
   @override
   void initState() {
     super.initState();
-    _geolocator
-        .getPositionStream(locationOptions)
-        .listen((Position position) async {
-      print(position.toString());
+    positionStream =
+        _geolocator.getPositionStream(locationOptions).listen((position) {
       setState(() {
         _userPosition = _toLatLng(position);
       });
-      shouldUpdatePlaces().then((result) {
-        print(result);
-        if (result) {
-          if (firstCall)
-            firstUpdateCall();
-          else {
-            _controller?.getVisibleRegion()?.then((bounds) async {
-              print(bounds.toString());
-              await PlaceRepository()
-                  .getBoundedPlaces(bounds)
-                  .then((updated) => updatePlaces(updated));
-            });
-          }
-        }
-      });
-      _controller?.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
-          target: _userPosition, zoom: await _controller.getZoomLevel())));
+      userMoveHandler();
     });
   }
 
-  void firstUpdateCall() async {
-    firstCall = false;
-    await PlaceRepository()
-        .getPlaces(_userPosition)
-        .then((places) => updatePlaces(places));
+  void userMoveHandler() async {
+    await _completer.future.then((controller) => _controller = controller);
+    shouldUpdatePlaces().then((result) async {
+      if (result) {
+        print("updating places");
+        await _completer.future.then((controller) => _controller = controller);
+
+        if (_completer.isCompleted) {
+          _controller.getVisibleRegion().then(((bounds) async {
+            print(bounds.toString());
+            await PlaceRepository()
+                .getBoundedPlaces(bounds)
+                .then((updated) => updatePlaces(updated));
+          }));
+        }
+      }
+    });
+    _controller?.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: _userPosition, zoom: await _controller.getZoomLevel())));
   }
 
   Future<bool> shouldUpdatePlaces() async {
-    if (firstCall) {
+    if (_lastCall == null) {
       print("first");
       _lastCall = _userPosition;
       return true;
     }
     if (_lastCall == _userPosition) return false;
 
-    double distance = await Geolocator().distanceBetween(_lastCall.latitude,
+    double distance = await _geolocator.distanceBetween(_lastCall.latitude,
         _lastCall.longitude, _userPosition.latitude, _userPosition.longitude);
     print(distance);
 
@@ -123,7 +120,7 @@ class _MapPageState extends State<MapPage> {
                   GoogleMap(
                     onMapCreated: (GoogleMapController controller) {
                       setState(() {
-                        _controller = controller;
+                        _completer.complete(controller);
                       });
                     },
                     initialCameraPosition: CameraPosition(
@@ -222,5 +219,14 @@ class _MapPageState extends State<MapPage> {
 
   LatLng _toLatLng(Position p) {
     return LatLng(p.latitude, p.longitude);
+  }
+
+  @override
+  void dispose() {
+    if (positionStream != null) {
+      positionStream.cancel();
+      positionStream = null;
+    }
+    super.dispose();
   }
 }
