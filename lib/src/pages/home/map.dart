@@ -33,42 +33,74 @@ class _MapPageState extends State<MapPage> {
   double placeNotSeenColor = BitmapDescriptor.hueGreen;
 
   Geolocator _geolocator = Geolocator();
+  LocationOptions locationOptions = LocationOptions(
+      accuracy: LocationAccuracy.high, distanceFilter: 10, timeInterval: 5000);
 
   double _zoom = 17.0;
+  bool firstCall = true;
 
   @override
   void initState() {
     super.initState();
-    _lastCall = new LatLng(0, 0);
-    _geolocator.getPositionStream(
-        LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10))
+    _geolocator
+        .getPositionStream(locationOptions)
         .listen((Position position) async {
-          //zoom = await _controller.getZoomLevel();
-          _userPosition = _toLatLng(position);
-          //_controller?.getVisibleRegion()?.then((value) => print(value.toString()));
-          updatePlaces();
-          _controller?.moveCamera(CameraUpdate.newCameraPosition(
-              CameraPosition(target: _userPosition, zoom: await _controller.getZoomLevel() )));
+      print(position.toString());
+      setState(() {
+        _userPosition = _toLatLng(position);
+      });
+      shouldUpdatePlaces().then((result) {
+        print(result);
+        if (result) {
+          if (firstCall)
+            firstUpdateCall();
+          else {
+            _controller?.getVisibleRegion()?.then((bounds) async {
+              print(bounds.toString());
+              await PlaceRepository()
+                  .getBoundedPlaces(bounds)
+                  .then((updated) => updatePlaces(updated));
+            });
+          }
+        }
+      });
+      _controller?.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: _userPosition, zoom: await _controller.getZoomLevel())));
     });
   }
 
-  Future<void> updatePlaces() async {
-      double distance = await Geolocator().distanceBetween(
-          _lastCall.latitude, _lastCall.longitude,
-          _userPosition.latitude, _userPosition.longitude
-      );
-      print(distance);
-    if (distance > 100) {
+  void firstUpdateCall() async {
+    firstCall = false;
+    await PlaceRepository()
+        .getPlaces(_userPosition)
+        .then((places) => updatePlaces(places));
+  }
+
+  Future<bool> shouldUpdatePlaces() async {
+    if (firstCall) {
+      print("first");
       _lastCall = _userPosition;
-      List<Place> _updatedPlaces = await PlaceRepository().getPlaces(
-          _userPosition);
-      print(this.toDiagnosticsNode().toString() + " \nis mounted:" + this.mounted.toString());
-      if (this.mounted) {
-        setState(() {
-          places = _updatedPlaces;
-          setMarkers();
-        });
-      }
+      return true;
+    }
+    if (_lastCall == _userPosition) return false;
+
+    double distance = await Geolocator().distanceBetween(_lastCall.latitude,
+        _lastCall.longitude, _userPosition.latitude, _userPosition.longitude);
+    print(distance);
+
+    return distance > 100;
+  }
+
+  void updatePlaces(List updated) {
+    _lastCall = _userPosition;
+    print(this.toDiagnosticsNode().toString() +
+        " \nis mounted:" +
+        this.mounted.toString());
+    if (this.mounted) {
+      setState(() {
+        places = updated;
+        setMarkers();
+      });
     }
   }
 
@@ -155,9 +187,9 @@ class _MapPageState extends State<MapPage> {
         icon: BitmapDescriptor.defaultMarkerWithHue(iconColor),
         consumeTapEvents: true,
         onTap: () {
-            _onMarkerTapped(markerId);
-            saveAsVisited(place.position);
-            Navigator.pushNamed(context, "/info", arguments: place);
+          _onMarkerTapped(markerId);
+          saveAsVisited(place.position);
+          Navigator.pushNamed(context, "/info", arguments: place);
         });
     setState(() {
       markers[markerId] = marker;
@@ -172,7 +204,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  //TODO: saveAsVisited och hasVisited bör nog dels ligga i annan klass (user?)  
+  //TODO: saveAsVisited och hasVisited bör nog dels ligga i annan klass (user?)
   // och dels köras vid appstart eller  inloggning.
   // Kanske går att använda userID från firebase-usern på något sätt så det blir
   // unikt för användaren ist för devicen?
@@ -191,5 +223,4 @@ class _MapPageState extends State<MapPage> {
   LatLng _toLatLng(Position p) {
     return LatLng(p.latitude, p.longitude);
   }
-
 }
