@@ -12,41 +12,39 @@ class PermissionPage extends StatefulWidget {
 class _PermissionPageState extends State<PermissionPage> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: CustomAppBar(
-          text: 'Behörigheter',
-          backButton: true,
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () async {
-                var hasOpened = openAppSettings();
-                debugPrint('App Settings opened: ' + hasOpened.toString());
-              },
-            )
-          ],
-        ),
-        body: Center(
-          child: ListView(
-              children: Permission.values
-                  .where((Permission permission) {
-                    if (Platform.isIOS) {
-                      return permission != Permission.unknown &&
-                          permission != Permission.sms &&
-                          permission != Permission.storage &&
-                          permission != Permission.ignoreBatteryOptimizations &&
-                          permission != Permission.accessMediaLocation;
-                    } else {
-                      return permission != Permission.unknown &&
-                          permission != Permission.mediaLibrary &&
-                          permission != Permission.photos &&
-                          permission != Permission.reminders;
-                    }
-                  })
-                  .map((permission) => PermissionWidget(permission))
-                  .toList()),
-        ),
+    return Scaffold(
+      appBar: CustomAppBar(
+        text: 'Behörigheter',
+        backButton: true,
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              var hasOpened = openAppSettings();
+              debugPrint('App Settings opened: ' + hasOpened.toString());
+            },
+          )
+        ],
+      ),
+      body: Center(
+        child: ListView(
+            children: Permission.values
+                .where((Permission permission) {
+                  if (Platform.isIOS) {
+                    return permission != Permission.unknown &&
+                        permission != Permission.sms &&
+                        permission != Permission.storage &&
+                        permission != Permission.ignoreBatteryOptimizations &&
+                        permission != Permission.accessMediaLocation;
+                  } else {
+                    return permission != Permission.unknown &&
+                        permission != Permission.mediaLibrary &&
+                        permission != Permission.photos &&
+                        permission != Permission.reminders;
+                  }
+                })
+                .map((permission) => PermissionWidget(permission))
+                .toList()),
       ),
     );
   }

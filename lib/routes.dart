@@ -12,7 +12,6 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/permissions': (context) => PermissionPage(),
   '/profile': (context) => ProfilePage(),
   '/search': (context) => SearchPage(),
-  '/settings': (context) => SettingsPage(),
 };
 
 Route unknownRoute(RouteSettings settings) {

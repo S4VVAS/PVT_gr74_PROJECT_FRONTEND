@@ -4,7 +4,6 @@ import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
-
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -18,15 +17,15 @@ class _ProfilePageState extends State<ProfilePage> {
     _getPlaces();
   }
 
-    Widget _profilePicture() {
+  Widget _profilePicture() {
     return Padding(
-        padding: EdgeInsets.all(16.0),
-        child: CircleAvatar(
-          radius: 120.0,
-          backgroundColor: Colors.transparent,
-          backgroundImage: AssetImage('assets/profil.png'),
-        ),
-      );
+      padding: EdgeInsets.all(16.0),
+      child: CircleAvatar(
+        radius: 120.0,
+        backgroundColor: Colors.transparent,
+        backgroundImage: AssetImage('assets/profil.png'),
+      ),
+    );
   }
 
   Future<void> _getPlaces() async {
@@ -34,10 +33,11 @@ class _ProfilePageState extends State<ProfilePage> {
     Set<String> keys = prefs.getKeys();
     List<String> visitedPlaces = new List<String>();
 
-    for(String str in keys) {
+    for (String str in keys) {
       visitedPlaces.add(str);
     }
     places = visitedPlaces;
+    print(places.length);
   }
 
   @override
@@ -68,20 +68,25 @@ class _ProfilePageState extends State<ProfilePage> {
               _profilePicture(),
               places == null
                   ? Container(
-                child: Center(
-                  child: Text(
-                    'Du har inga besökta platser än, eller så laddas dem!',
-                    style: TextStyle(
-                        fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
-                  ),
-                ),
-              )
-                  :
-                  Center(
-                    child: Text('Besökta platser: '),
-                  ),
-              ListView.builder(scrollDirection: Axis.vertical,
-                  shrinkWrap: true, itemCount: places.length, itemBuilder: (BuildContext ctxt, int index) {return new Button(places[index]);})
+                      child: Center(
+                        child: Text(
+                          'Du har inga besökta platser än, eller så laddas dem!',
+                          style: TextStyle(
+                              fontFamily: 'Avenir-Medium',
+                              color: Colors.grey[400]),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text('Besökta platser: '),
+                    ),
+              ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: places.length?? 0,
+                  itemBuilder: (BuildContext ctxt, int index) {
+                    return new Button(places[index]);
+                  })
             ],
           ),
         ),
@@ -89,4 +94,3 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-

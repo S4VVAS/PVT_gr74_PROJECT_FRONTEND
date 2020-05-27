@@ -50,7 +50,7 @@ class NewMissionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(text: "Stockholms blodbad"),
+      appBar: CustomAppBar(text: "Stockholms blodbad", backButton: true,),
       body: Center(
         child: Container(
           width: MediaQuery
