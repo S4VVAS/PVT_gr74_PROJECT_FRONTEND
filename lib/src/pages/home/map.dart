@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -28,7 +29,7 @@ class _MapPageState extends State<MapPage> {
   final FirestoreService _firestoreService = FirestoreService();
 
   List<Place> places = new List<Place>();
-  List<Place> visited = new List<Place>();
+  List<GeoPoint> visited = new List<GeoPoint>();
   int _markerIdCounter = 1;
   MarkerId selectedMarker;
 
@@ -44,6 +45,7 @@ class _MapPageState extends State<MapPage> {
       accuracy: LocationAccuracy.high, distanceFilter: 10);
 
   double _zoom = 16.0;
+
 
   @override
   void initState() {
@@ -65,7 +67,7 @@ class _MapPageState extends State<MapPage> {
         await _completer.future.then((controller) => _controller = controller);
 
         if (_completer.isCompleted) {
-          _controller.getVisibleRegion().then(((bounds) async {
+          _controller?.getVisibleRegion()?.then(((bounds) async {
             print(bounds.toString());
             await PlaceRepository()
                 .getBoundedPlaces(bounds)
@@ -212,10 +214,10 @@ class _MapPageState extends State<MapPage> {
   // unikt för användaren ist för devicen?
   Future<void> saveAsVisited(Place place) async {
     User user = Globals.instance.user;
-    visited.add(place);
+    visited.add(GeoPoint(place.position.latitude, place.position.longitude));
     user.visited = visited; 
     //user.level = 240;
-    print(user.name + " level: " + user.level.toString());
+    print(user.name + " visited places coords: " + user.visited.toString());
     await _firestoreService.updateUser(user).then((value) => print("done"));
     
     /*SharedPreferences prefs = await SharedPreferences.getInstance();
