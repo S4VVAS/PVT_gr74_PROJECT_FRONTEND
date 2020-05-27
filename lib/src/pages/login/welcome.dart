@@ -13,55 +13,6 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  
-  Widget _loginButton() {
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/login');
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                  color: Colors.deepPurple[300],
-                  offset: Offset(2, 4),
-                  blurRadius: 8,
-                  spreadRadius: 2)
-            ],
-            color: Colors.deepPurple),
-        child: Text(
-          'Login',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
-  }
-
-  Widget _signUpButton() {
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/signup');
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 13),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          border: Border.all(color: Colors.deepOrange, width: 2),
-        ),
-        child: Text(
-          'Sign up',
-          style: TextStyle(fontSize: 20, color: Colors.deepOrange),
-        ),
-      ),
-    );
-  }
-
   Widget _welcomePage() {
     return Scaffold(
       body: SingleChildScrollView(
@@ -89,15 +40,25 @@ class _WelcomePageState extends State<WelcomePage> {
               SizedBox(
                 height: 100,
               ),
-              WelcomeButton(text: 'Logga in', color: Colors.orange, filled: false, onTap: () {
-                Navigator.pushNamed(context, '/login');
-              },),
+              WelcomeButton(
+                text: 'Logga in',
+                color: Colors.orange,
+                textColor: Colors.orange,
+                filled: true,
+                onTap: () {
+                  Navigator.pushNamed(context, '/login');
+                },
+              ),
               SizedBox(
                 height: 20,
               ),
-              WelcomeButton(text: 'Registrera nytt konto', color: Colors.orange, filled: true, onTap: () {
-                Navigator.pushNamed(context, '/signup');
-              })
+              WelcomeButton(
+                  text: 'Registrera nytt konto',
+                  color: Colors.orange,
+                  filled: false,
+                  onTap: () {
+                    Navigator.pushNamed(context, '/signup');
+                  })
             ],
           ),
         ),

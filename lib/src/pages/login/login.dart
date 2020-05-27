@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
-            'Don\'t have an account?',
+            'Saknar konto?',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           SizedBox(
@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
               Navigator.pushReplacementNamed(context, '/signup');
             },
             child: Text(
-              'Register',
+              'Registrera ett här',
               style: TextStyle(
                   color: Color(0xfff79c4f),
                   fontSize: 13,
@@ -172,21 +172,21 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
             },
             validator: (String value) {
               if (value.isEmpty) {
-                return 'Please enter some text';
+                return 'Vänligen ange email';
               } else if (!Validator.validateEmail(value)) {
-                return 'Please enter a valid email';
+                return 'Vänligen ange giltig email';
               }
               return null;
             },
           ),
           TextFormField(
             controller: _passwordController,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Lösenord'),
             focusNode: focus,
             obscureText: true,
             validator: (String value) {
               if (value.isEmpty) {
-                return 'Please enter some text';
+                return 'Vänligen ange lösenord';
               }
               return null;
             },
@@ -195,10 +195,22 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
             height: 20,
           ),
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            alignment: Alignment.center,
-            child: _submitButton(),
-          ),
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              alignment: Alignment.center,
+              child: WelcomeButton(
+                  text: 'Logga in',
+                  color: Colors.grey.shade300,
+                  filled: true,
+                  onTap: () async {
+                    if (_formKey.currentState.validate()) {
+                      _signInWithEmailAndPassword();
+                    }
+                  },
+                  gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xfffbb448),
+                       Color(0xfff7892b)]))),
           Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -214,37 +226,6 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         ],
       ),
     );
-  }
-
-  Widget _submitButton() {
-    return InkWell(
-        onTap: () async {
-          if (_formKey.currentState.validate()) {
-            _signInWithEmailAndPassword();
-          }
-        },
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.symmetric(vertical: 15),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(5)),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                    color: Colors.grey.shade200,
-                    offset: Offset(2, 4),
-                    blurRadius: 5,
-                    spreadRadius: 2)
-              ],
-              gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [Color(0xfffbb448), Color(0xfff7892b)])),
-          child: Text(
-            'Submit',
-            style: TextStyle(fontSize: 20, color: Colors.white),
-          ),
-        ));
   }
 
   void _signInWithEmailAndPassword() async {

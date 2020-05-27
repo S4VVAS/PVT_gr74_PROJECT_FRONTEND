@@ -126,29 +126,36 @@ class MapSettingsButton extends StatelessWidget {
 }
 
 class WelcomeButton extends StatelessWidget {
-  WelcomeButton({this.text, this.filled, this.onTap, this.color})
+  WelcomeButton(
+      {this.text,
+      this.filled,
+      this.onTap,
+      this.color,
+      this.textColor,
+      this.gradient})
       : _filledBox = new BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(5)),
-        boxShadow: <BoxShadow>[
-              BoxShadow(
-                  color: color.withAlpha(100),
-                  offset: Offset(2, 4),
-                  blurRadius: 5,
-                  spreadRadius: 2)
-            ],
-      ),
-
-      _unfilledBox = new BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(5)),
-        border: Border.all(color: Colors.white, width: 2),
-      );
-      
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+                color: color.withAlpha(255),
+                offset: Offset(2, 4),
+                blurRadius: 8,
+                spreadRadius: 2)
+          ],
+          gradient: gradient ?? null,
+        ),
+        _unfilledBox = new BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          border: Border.all(color: Colors.white, width: 2),
+        );
 
   final String text;
   final bool filled;
   final GestureTapCallback onTap;
   final Color color;
+  final Color textColor;
+  final Gradient gradient;
   final BoxDecoration _filledBox;
   final BoxDecoration _unfilledBox;
 
@@ -163,7 +170,10 @@ class WelcomeButton extends StatelessWidget {
         decoration: filled ? _filledBox : _unfilledBox,
         child: Text(
           text,
-          style: TextStyle(fontSize: 20, color: filled ? color : Colors.white),
+          style: Theme.of(context)
+              .textTheme
+              .button
+              .copyWith(fontSize: 20, color: textColor ?? Colors.white),
         ),
       ),
     );
