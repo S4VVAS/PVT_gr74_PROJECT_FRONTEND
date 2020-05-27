@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
+import 'package:history_go/src/models/place.dart';
+import 'package:history_go/src/models/user.dart';
+import 'package:history_go/src/services/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -10,7 +14,8 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<String> places;
+  List<Place> places;
+  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   void initState() {
@@ -30,21 +35,37 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _getPlaces() async {
+
+    User user = Globals.instance.user;
+    if(user == null){
+      print('User is null in Profilpage');
+    }
+    else {
+      user = await _firestoreService.getUser(user.id);
+      if (user == null) {
+        print('User is null in Getplaces');
+      }
+      else {
+        Globals.instance.user = user;
+        places = Globals.instance.user.visited;
+        print('Gick igenom getPlaces');
+      }
+    }
+    /*
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Set<String> keys = prefs.getKeys();
     List<String> visitedPlaces = new List<String>();
 
     for(String str in keys) {
       visitedPlaces.add(str);
-    }
-    places = visitedPlaces;
+    }*/
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        text: "Profil",
+        text: 'Globals.instance.user.name',
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -76,13 +97,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               )
-                  :
-                  Center(
-                    child: Text('Besökta platser: '),
-                  ),
-              ListView.builder(scrollDirection: Axis.vertical,
-                  shrinkWrap: true, itemCount: places.length, itemBuilder: (BuildContext ctxt, int index) {return new Button(places[index]);})
-            ],
+                  : {
+                Center(
+                  child: Text('Besökta platser: '),
+                ),
+                ListView.builder(scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: places.length,
+                    itemBuilder: (BuildContext ctxt, int index) {
+                      return new Button(places[index].entries[0].title);
+                    })
+              }],
           ),
         ),
       ),

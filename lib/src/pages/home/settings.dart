@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
+
+import '../pages.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({Key key}) : super(key: key);
@@ -11,6 +14,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +25,10 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.all(28.0),
           child: Column(
             children: <Widget>[
-              Button('Aviseringar'),
+              Button('Aviseringar', onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (BuildContext context) => NewMissionPage()));
+          },),
               Button('Konto'),
               Button('Sekretess'),
               Button('Säkerhet'),
@@ -32,4 +39,5 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
 }
