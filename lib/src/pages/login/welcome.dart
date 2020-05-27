@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/pages/pages.dart';
 
@@ -31,10 +32,10 @@ class _WelcomePageState extends State<WelcomePage> {
                   blurRadius: 8,
                   spreadRadius: 2)
             ],
-            color: Colors.white),
+            color: Colors.deepPurple),
         child: Text(
           'Login',
-          style: TextStyle(fontSize: 20, color: Colors.deepPurple),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
     );
@@ -51,11 +52,11 @@ class _WelcomePageState extends State<WelcomePage> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(5)),
-          border: Border.all(color: Colors.white, width: 2),
+          border: Border.all(color: Colors.deepOrange, width: 2),
         ),
         child: Text(
           'Sign up',
-          style: TextStyle(fontSize: 20, color: Colors.white),
+          style: TextStyle(fontSize: 20, color: Colors.deepOrange),
         ),
       ),
     );
@@ -71,7 +72,7 @@ class _WelcomePageState extends State<WelcomePage> {
               borderRadius: BorderRadius.all(Radius.circular(5)),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                    color: Colors.grey.shade200,
+                    color: Colors.purple[400],
                     offset: Offset(2, 4),
                     blurRadius: 5,
                     spreadRadius: 2)
@@ -79,23 +80,24 @@ class _WelcomePageState extends State<WelcomePage> {
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.deepPurpleAccent,
-                    Colors.deepPurpleAccent[100]
-                  ])),
+                  colors: [Color(0xfffbb448), Color(0xffe46b10)])),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TitleLogo(),
+              WhiteTitleLogo(),
               SizedBox(
                 height: 100,
               ),
-              _loginButton(),
+              WelcomeButton(text: 'Logga in', color: Colors.orange, filled: false, onTap: () {
+                Navigator.pushNamed(context, '/login');
+              },),
               SizedBox(
                 height: 20,
               ),
-              _signUpButton()
+              WelcomeButton(text: 'Registrera nytt konto', color: Colors.orange, filled: true, onTap: () {
+                Navigator.pushNamed(context, '/signup');
+              })
             ],
           ),
         ),

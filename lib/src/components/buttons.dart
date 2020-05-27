@@ -23,8 +23,7 @@ class Button extends StatelessWidget {
         onPressed: () {
           if (route != null) {
             Navigator.of(context).pushNamed(route);
-          } else if (onPressed != null)
-            return onPressed.call();
+          } else if (onPressed != null) return onPressed.call();
           return;
         },
         shape: ContinuousRectangleBorder(
@@ -54,7 +53,8 @@ class SignOutButton extends StatelessWidget {
         try {
           _auth.signOut().whenComplete(() {
             print('Signed out Successfully');
-            Navigator.pushNamedAndRemoveUntil(context, '/welcome', ModalRoute.withName('/'));
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/welcome', ModalRoute.withName('/'));
           });
         } catch (e) {
           print('Could not sign out\n' + e);
@@ -119,6 +119,51 @@ class MapSettingsButton extends StatelessWidget {
         icon: Icon(
           Icons.settings,
           color: Colors.grey[800],
+        ),
+      ),
+    );
+  }
+}
+
+class WelcomeButton extends StatelessWidget {
+  WelcomeButton({this.text, this.filled, this.onTap, this.color})
+      : _filledBox = new BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+        boxShadow: <BoxShadow>[
+              BoxShadow(
+                  color: color.withAlpha(100),
+                  offset: Offset(2, 4),
+                  blurRadius: 5,
+                  spreadRadius: 2)
+            ],
+      ),
+
+      _unfilledBox = new BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+        border: Border.all(color: Colors.white, width: 2),
+      );
+      
+
+  final String text;
+  final bool filled;
+  final GestureTapCallback onTap;
+  final Color color;
+  final BoxDecoration _filledBox;
+  final BoxDecoration _unfilledBox;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.center,
+        decoration: filled ? _filledBox : _unfilledBox,
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 20, color: filled ? color : Colors.white),
         ),
       ),
     );

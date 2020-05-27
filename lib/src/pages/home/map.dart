@@ -43,6 +43,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
+    //ERROR_ALREADY_REQUESTING_PERMISSIONS
     positionStream =
         _geolocator.getPositionStream(locationOptions).listen((position) {
       setState(() {
