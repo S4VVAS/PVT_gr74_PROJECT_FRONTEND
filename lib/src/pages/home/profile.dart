@@ -13,7 +13,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<Place> places;
+  List<dynamic> places;
   final FirestoreService _firestoreService = FirestoreService();
 
   @override
@@ -107,7 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     shrinkWrap: true,
                     itemCount: places.length,
                     itemBuilder: (BuildContext ctxt, int index) {
-                      return new Button(places[index].entries[0].title);
+                      return new Button(places[index].toString());
                     })
               }],
           ),
