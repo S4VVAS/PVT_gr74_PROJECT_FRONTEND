@@ -6,7 +6,7 @@ class FirestoreService {
   final CollectionReference _usersCollectionReference =
   Firestore.instance.collection('users');
 
-  Future createUser(User user) async {
+  Future<void> createUser(User user) async {
     try {
       await _usersCollectionReference.document(user.id).setData(user.toJson());
     } catch (e) {
@@ -14,21 +14,23 @@ class FirestoreService {
     }
   }
 
-  Future updateUser(User user) async {
+  Future<void> updateUser(User user) async {
     try {
+      print("userid: " + user.id);
       await _usersCollectionReference.document(user.id).setData(user.toJson());
     } catch (e) {
-      return e.message;
+      print(e);
     }
   }
 
-  Future getUser(String uid) async {
+  Future<User> getUser(String uid) async {
     try {
       var userData = await _usersCollectionReference.document(uid).get();
       print('userdata: ' + userData.toString());
       return User.fromData(userData.data);
     } catch (e) {
-      return e.message;
+      print(e);
+      return null;
     }
   }
 }

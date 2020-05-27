@@ -8,7 +8,7 @@ class User {
   final String imgUrl;
   //final Image img;
   int level;
-  List<Place> visited;
+  List<dynamic> visited = new List();
 
   User({this.name, this.id, this.email, this.imgUrl, this.level, this.visited});
 

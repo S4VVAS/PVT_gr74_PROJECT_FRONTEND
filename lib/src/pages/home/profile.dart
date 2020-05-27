@@ -13,7 +13,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<Place> places;
+  List<dynamic> places;
   final FirestoreService _firestoreService = FirestoreService();
 
   @override
@@ -55,9 +55,12 @@ class _ProfilePageState extends State<ProfilePage> {
     Set<String> keys = prefs.getKeys();
     List<String> visitedPlaces = new List<String>();
 
-    for(String str in keys) {
+    for (String str in keys) {
       visitedPlaces.add(str);
-    }*/
+    }
+    }
+    places = visitedPlaces;
+    print(places.length);*/
   }
 
   @override

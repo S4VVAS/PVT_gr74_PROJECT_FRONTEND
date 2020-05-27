@@ -16,9 +16,14 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  User _currentUser = Globals.instance.user;
   //User get currentUser => _currentUser;
   final FirestoreService _firestoreService = FirestoreService();
+
+  @override
+  void initState() {
+    super.initState();
+    _populateCurrentUser();
+  }
 
   Widget _loginButton() {
     return InkWell(
@@ -128,7 +133,6 @@ class _WelcomePageState extends State<WelcomePage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           FirebaseUser user = snapshot.data;
-          isUserLoggedIn();
           if (user == null) {
             return _welcomePage();
           }
@@ -144,21 +148,17 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
-  Future<bool> isUserLoggedIn() async {
-    var user = await FirebaseAuth.instance.currentUser();
-    await _populateCurrentUser(user);
-    print('Populated user');
-    return user != null;
-  }
-
-  Future _populateCurrentUser(FirebaseUser user) async {
+  Future<void> _populateCurrentUser() async {
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
     if (user != null) {
-      _currentUser = await _firestoreService.getUser(user.uid);
-      Globals.instance.user = _currentUser;
-      print(_currentUser.level);
-    }
-    else{
+      await _firestoreService.getUser(user.uid).then((user) {
+
+        print("Populated user " + user.id);
+        Globals.instance.user = user;
+      });
+    } else {
       print('User was NULL');
     }
   }
 }
+

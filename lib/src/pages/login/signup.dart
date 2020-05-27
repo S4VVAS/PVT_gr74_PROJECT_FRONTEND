@@ -131,7 +131,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 email: user.email,
                 imgUrl: '',
                 level: 1,
-                visited: new List<Place>()
+                visited: new List<dynamic>()
             )
         );
       } catch (e) {
