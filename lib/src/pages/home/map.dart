@@ -2,7 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
 import 'package:history_go/src/models/place.dart';
+import 'package:history_go/src/models/user.dart';
+import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +25,7 @@ class _MapPageState extends State<MapPage> {
   Completer<GoogleMapController> _completer = new Completer();
   GoogleMapController _controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  final FirestoreService _firestoreService = FirestoreService();
 
   List<Place> places = new List<Place>();
   int _markerIdCounter = 1;
@@ -176,7 +180,7 @@ class _MapPageState extends State<MapPage> {
     _markerIdCounter++;
     final MarkerId markerId = MarkerId(markerIdVal);
 
-    bool visited = await hasVisited(place.position);
+    bool visited = await hasVisited(place);
     double iconColor = visited ? placeSeenColor : placeNotSeenColor;
 
     final Marker marker = Marker(
@@ -185,9 +189,9 @@ class _MapPageState extends State<MapPage> {
         icon: BitmapDescriptor.defaultMarkerWithHue(iconColor),
         consumeTapEvents: true,
         onTap: () {
-          _onMarkerTapped(markerId);
-          saveAsVisited(place.position);
-          Navigator.pushNamed(context, "/info", arguments: place);
+            _onMarkerTapped(markerId);
+            saveAsVisited(place);
+            Navigator.pushNamed(context, "/info", arguments: place);
         });
     setState(() {
       markers[markerId] = marker;
@@ -206,16 +210,32 @@ class _MapPageState extends State<MapPage> {
   // och dels köras vid appstart eller  inloggning.
   // Kanske går att använda userID från firebase-usern på något sätt så det blir
   // unikt för användaren ist för devicen?
-  void saveAsVisited(LatLng position) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  void saveAsVisited(Place place) async {
+    User user = Globals.instance.user;
+    user.visited.add(place);
+    _firestoreService.updateUser(user);
+    /*SharedPreferences prefs = await SharedPreferences.getInstance();
     // Value används ej, därav -> "".
-    await prefs.setString(position.toString(), "");
+    await prefs.setString(position.toString(), "");*/
   }
 
-  Future<bool> hasVisited(LatLng position) async {
+  Future<bool> hasVisited(Place place) async {
+    User user = Globals.instance.user;
+    User tmpUser = await _firestoreService.getUser(user.id);
+    if(tmpUser == null){
+      print('TmpUser is NULL');
+    }
+    else {
+      List<Place> places = tmpUser.visited;
+      bool visited = places.contains(place);
+      Globals.instance.user = tmpUser;
+      return visited;
+    }
+    return false;
+    /*
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool visited = prefs.containsKey(position.toString());
-    return Future<bool>.value(visited);
+    return Future<bool>.value(visited);*/
   }
 
   LatLng _toLatLng(Position p) {
