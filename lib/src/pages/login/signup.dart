@@ -133,7 +133,7 @@ class _SignUpPageState extends State<SignUpPage> {
             email: user.email,
             imgUrl: '',
             level: 1,
-            visited: new List<GeoPoint>()));
+            visited: new Map<String, GeoPoint>()));
       } else {
         _success = false;
       }

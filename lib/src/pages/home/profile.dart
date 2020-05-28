@@ -14,7 +14,8 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<dynamic> places = [];
+  Map<String, dynamic> places = new Map<String, dynamic>();
+  var entryList;
   final FirestoreService _firestoreService = FirestoreService();
 
   @override
@@ -47,6 +48,8 @@ class _ProfilePageState extends State<ProfilePage> {
       else {
         Globals.instance.user = user;
         places = Globals.instance.user.visited;
+        entryList = places.entries.toList();
+        print(entryList[0]);
         print('Gick igenom getPlaces');
       }
     }
@@ -114,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       shrinkWrap: true,
                       itemCount: places.length ?? 0,
                       itemBuilder: (BuildContext ctxt, int index) {
-                        return new Button(places[index].toString());
+                        return new Button(entryList[index].toString());
                       }))
             ],
           ),

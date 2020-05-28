@@ -11,7 +11,7 @@ class User {
   String imgUrl;
   //final Image img;
   int level;
-  List<GeoPoint> visited;
+  Map<String, GeoPoint> visited;
 
   User({this.name, this.id, this.email, this.imgUrl, this.level, this.visited});
 
@@ -23,9 +23,9 @@ class User {
     //img = data['img'],
     level = data['level'];
     if (data['visited'] != null) {
-      visited = new List<GeoPoint>();
-      data['visited'].forEach((v) {
-        visited.add(v);
+      visited = new Map<String, GeoPoint>();
+      data['visited'].forEach((k, v) {
+        visited[k] = v;
       });
     }
   }
