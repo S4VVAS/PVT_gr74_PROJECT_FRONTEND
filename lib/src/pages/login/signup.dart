@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _success;
   String _message = '';
+
+  String _userEmail;
 
   @override
   void initState() {
@@ -119,28 +122,30 @@ class _SignUpPageState extends State<SignUpPage> {
         password: _passwordController.text,
       ))
           .user;
-      if (user != null)
-        _success = true;
-        _userEmail = user.email;
-      });
-      try {
-        await _firestoreService.createUser(
-            User(
-                name: user.email,
-                id: user.uid,
-                email: user.email,
-                imgUrl: '',
-                level: 1,
-                visited: new List<dynamic>()
-            )
-        );
-      } catch (e) {
-        return e.message;
+      if (user != null) {
+        setState(() {
+          _success = true;
+          _userEmail = user.email;
+        });
+        await _firestoreService.createUser(User(
+            name: user.email,
+            id: user.uid,
+            email: user.email,
+            imgUrl: '',
+            level: 1,
+            visited: new List<GeoPoint>()));
+      } else {
+        _success = false;
       }
-    } else {
-      _success = false;
+    } on PlatformException catch (e) {
+      print(e);
+      _setErrorMessage(e.message);
+    } catch (e) {
+      print(e);
+      _setErrorMessage('Något gick fel');
     }
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +181,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       if (_formKey.currentState.validate()) {
                         _register().then((value) {
                           if (_success != null && _success) {
-                            Navigator.of(context).pop();
+                            //Navigator.of(context).pop();
                           }
                         });
                       }

@@ -29,7 +29,7 @@ class _MapPageState extends State<MapPage> {
   final FirestoreService _firestoreService = FirestoreService();
 
   List<Place> places = new List<Place>();
-  List<GeoPoint> visited = new List<GeoPoint>();
+  //List<GeoPoint> visited = new List<GeoPoint>();
   int _markerIdCounter = 1;
   MarkerId selectedMarker;
 
@@ -215,8 +215,8 @@ class _MapPageState extends State<MapPage> {
   // unikt för användaren ist för devicen?
   Future<void> saveAsVisited(Place place) async {
     User user = Globals.instance.user;
-    visited.add(GeoPoint(place.position.latitude, place.position.longitude));
-    user.visited = visited; 
+    user.visited.add(GeoPoint(place.position.latitude, place.position.longitude));
+    //user.visited = visited;
     //user.level = 240;
     print(user.name + " visited places coords: " + user.visited.toString());
     await _firestoreService.updateUser(user).then((value) => print("done"));

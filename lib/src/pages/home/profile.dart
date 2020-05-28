@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
@@ -13,7 +14,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<dynamic> places;
+  List<dynamic> places = [];
   final FirestoreService _firestoreService = FirestoreService();
 
   @override
@@ -34,9 +35,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _getPlaces() async {
-
     User user = Globals.instance.user;
-    if(user == null){
+    if (user == null) {
       print('User is null in Profilpage');
     }
     else {
@@ -83,33 +83,39 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: Center(
         child: Container(
-          width: MediaQuery.of(context).size.width,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
           padding: EdgeInsets.all(28.0),
-          color: Theme.of(context).backgroundColor,
+          color: Theme
+              .of(context)
+              .backgroundColor,
           child: Column(
             children: <Widget>[
               _profilePicture(),
               places == null
                   ? Container(
-                      child: Center(
-                        child: Text(
-                          'Du har inga besökta platser än, eller så laddas dem!',
-                          style: TextStyle(
-                              fontFamily: 'Avenir-Medium',
-                              color: Colors.grey[400]),
-                        ),
-                      ),
-                    )
+                child: Center(
+                  child: Text(
+                    'Du har inga besökta platser än, eller så laddas dem!',
+                    style: TextStyle(
+                        fontFamily: 'Avenir-Medium',
+                        color: Colors.grey[400]),
+                  ),
+                ),
+              )
                   : Center(
-                      child: Text('Besökta platser: '),
-                    ),
-              ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: places.length?? 0,
-                  itemBuilder: (BuildContext ctxt, int index) {
-                    return new Button(places[index]);
-                  })
+                child: Text('Besökta platser: '),
+              ),
+              Expanded(
+                  child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: places.length ?? 0,
+                      itemBuilder: (BuildContext ctxt, int index) {
+                        return new Button(places[index].toString());
+                      }))
             ],
           ),
         ),
