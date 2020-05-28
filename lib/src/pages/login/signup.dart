@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/firestore/firestore_service.dart';
@@ -24,46 +25,15 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   FocusNode focus;
 
-  bool _success;
   String _userEmail;
+  bool _success;
+  String _message = '';
 
   @override
   void initState() {
     super.initState();
 
     focus = FocusNode();
-  }
-
-  Widget _submitButton() {
-    return InkWell(
-      onTap: () async {
-        if (_formKey.currentState.validate()) {
-          _register();
-        }
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                  color: Colors.grey.shade200,
-                  offset: Offset(2, 4),
-                  blurRadius: 5,
-                  spreadRadius: 2)
-            ],
-            gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Color(0xfffbb448), Color(0xfff7892b)])),
-        child: Text(
-          'Register Now',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
   }
 
   Widget _loginAccountLabel() {
@@ -74,7 +44,7 @@ class _SignUpPageState extends State<SignUpPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
-            'Already have an account?',
+            'Har redan ett konto?',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           SizedBox(
@@ -85,7 +55,7 @@ class _SignUpPageState extends State<SignUpPage> {
               Navigator.pushReplacementNamed(context, '/login');
             },
             child: Text(
-              'Login',
+              'Logga in',
               style: TextStyle(
                   color: Color(0xfff79c4f),
                   fontSize: 13,
@@ -113,70 +83,64 @@ class _SignUpPageState extends State<SignUpPage> {
             },
             validator: (String value) {
               if (value.isEmpty) {
-                return 'Please enter some text';
-              } /*else if (!Validator.validateEmail(value)) {
-                return 'Please enter a valid email';
-              }*/
+                return 'Vänligen ange en email';
+              }
               return null;
             },
           ),
           TextFormField(
             controller: _passwordController,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Lösenord'),
             focusNode: focus,
             obscureText: true,
             validator: (String value) {
               if (value.isEmpty) {
-                return 'Please enter some text';
-              } /*else if (!Validator.validatePassword(value)) {
-                return 'Password must contain minimum 8 characters \n'+
-                      'At least one uppercase letter, '+ 
-                      'one lowercase letter\nand one digit\n'+
-                      'Can not contain special characters';
-              }*/
+                return 'Vänligen ange ett lösenord';
+              }
               return null;
             },
           ),
           Container(
             alignment: Alignment.center,
-            child: Text(_success == null
-                ? ''
-                : (_success
-                    ? 'Successfully registered ' + _userEmail
-                    : 'Registration failed')),
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              _message,
+              style: TextStyle(fontSize: 14, color: Colors.red),
+            ),
           )
         ],
       ),
     );
   }
 
-  void _register() async {
-    final FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
-      email: _emailController.text,
-      password: _passwordController.text,
-    ))
-        .user;
-    if (user != null) {
-      setState(() {
-        _success = true;
-        _userEmail = user.email;
-      });
-      try {
-        await _firestoreService.createUser(
-            User(
-                name: user.email,
-                id: user.uid,
-                email: user.email,
-                imgUrl: '',
-                level: 1,
-                visited: new List<dynamic>()
-            )
-        );
-      } catch (e) {
-        return e.message;
+  Future<void> _register() async {
+    try {
+      final FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      ))
+          .user;
+      if (user != null) {
+        setState(() {
+          _success = true;
+          _userEmail = user.email;
+        });
+        await _firestoreService.createUser(User(
+            name: user.email,
+            id: user.uid,
+            email: user.email,
+            imgUrl: '',
+            level: 1,
+            visited: new List<dynamic>()));
+      } else {
+        _success = false;
       }
-    } else {
-      _success = false;
+    } on PlatformException catch (e) {
+      print(e);
+      _setErrorMessage(e.message);
+    } catch (e) {
+      print(e);
+      _setErrorMessage('Något gick fel');
     }
   }
 
@@ -206,7 +170,24 @@ class _SignUpPageState extends State<SignUpPage> {
                 SizedBox(
                   height: 20,
                 ),
-                _submitButton(),
+                WelcomeButton(
+                    text: 'Registrera nu',
+                    color: Colors.grey.shade300,
+                    onTap: () async {
+                      _resetErrorMessage();
+                      if (_formKey.currentState.validate()) {
+                        _register().then((value) {
+                          if (_success != null && _success) {
+                            Navigator.of(context).pop();
+                          }
+                        });
+                      }
+                    },
+                    filled: true,
+                    gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [Color(0xfffbb448), Color(0xfff7892b)])),
                 Expanded(
                   flex: 4,
                   child: SizedBox(),
@@ -229,6 +210,18 @@ class _SignUpPageState extends State<SignUpPage> {
     )));
   }
 
+  void _setErrorMessage(String message) {
+    if (message != null) {
+      setState(() {
+        _message = message;
+      });
+    }
+  }
+
+  void _resetErrorMessage() {
+    _setErrorMessage(' ');
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -239,8 +232,10 @@ class _SignUpPageState extends State<SignUpPage> {
 }
 
 class Validator {
-  static final RegExp regExpPassword = new RegExp(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$");
-  static final RegExp regExpEmail = new RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$");
+  static final RegExp regExpPassword =
+      new RegExp(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$");
+  static final RegExp regExpEmail = new RegExp(
+      r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$");
 
   static bool validatePassword(String password) {
     if (password == null) return false;

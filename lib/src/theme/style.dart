@@ -14,8 +14,8 @@ ThemeData appTheme() {
       typography: Typography.material2018(),     
       textTheme: TextTheme(
         headline4: GoogleFonts.sourceSansPro(color: Colors.white, fontSize: 28),
-        headline5: GoogleFonts.sacramento(
-            color: Colors.white, fontSize: 24, fontWeight: FontWeight.w400),
+        headline5: GoogleFonts.cormorantGaramond(
+            color: Colors.white, fontSize: 24, fontWeight: FontWeight.w400, letterSpacing: 1.1),
         headline6: GoogleFonts.sourceSansPro(
             color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500, letterSpacing: 0.15),
         subtitle1: GoogleFonts.roboto(

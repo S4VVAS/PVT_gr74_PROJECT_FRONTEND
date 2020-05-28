@@ -9,7 +9,6 @@ import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
 import 'package:history_go/src/components/buttons.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /*const double CAMERA_TILT = 80;
 const double CAMERA_BEARING = 30;*/
@@ -50,6 +49,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
+    //ERROR_ALREADY_REQUESTING_PERMISSIONS
     positionStream =
         _geolocator.getPositionStream(locationOptions).listen((position) {
       setState(() {
@@ -254,7 +254,6 @@ class _MapPageState extends State<MapPage> {
       positionStream.cancel();
       positionStream = null;
     }
-    _controller = null;
     super.dispose();
   }
 }
