@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
 import 'package:history_go/src/pages/pages.dart';
+import 'package:history_go/src/services/globals.dart';
 
 class WelcomePage extends StatefulWidget {
   WelcomePage({Key key, this.title}) : super(key: key);
@@ -13,6 +15,15 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
+  //User get currentUser => _currentUser;
+  final FirestoreService _firestoreService = FirestoreService();
+
+  @override
+  void initState() {
+    super.initState();
+    _populateCurrentUser();
+  }
+
   Widget _welcomePage() {
     return Scaffold(
       body: SingleChildScrollView(
@@ -86,5 +97,18 @@ class _WelcomePageState extends State<WelcomePage> {
         }
       },
     );
+  }
+
+  Future<void> _populateCurrentUser() async {
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    if (user != null) {
+      await _firestoreService.getUser(user.uid).then((user) {
+        
+        print("Populated user " + user.id);
+        Globals.instance.user = user;
+      });
+    } else {
+      print('User was NULL');
+    }
   }
 }

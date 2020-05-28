@@ -3,8 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
+import 'package:history_go/src/models/place.dart';
+import 'package:history_go/src/models/user.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+final FirestoreService _firestoreService = FirestoreService();
 
 class SignUpPage extends StatefulWidget {
   SignUpPage({Key key}) : super(key: key);
@@ -21,6 +25,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   FocusNode focus;
 
+  String _userEmail;
   bool _success;
   String _message = '';
 
@@ -115,10 +120,21 @@ class _SignUpPageState extends State<SignUpPage> {
         password: _passwordController.text,
       ))
           .user;
-      if (user != null)
-        _success = true;
-      else
+      if (user != null) {
+        setState(() {
+          _success = true;
+          _userEmail = user.email;
+        });
+        await _firestoreService.createUser(User(
+            name: user.email,
+            id: user.uid,
+            email: user.email,
+            imgUrl: '',
+            level: 1,
+            visited: new List<dynamic>()));
+      } else {
         _success = false;
+      }
     } on PlatformException catch (e) {
       print(e);
       _setErrorMessage(e.message);

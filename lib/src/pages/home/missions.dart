@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
 import 'package:history_go/src/pages/pages.dart';
 
 class MissionsPage extends StatelessWidget {
+  final FirestoreService _firestoreService = FirestoreService();
 
   Widget _missionListView(BuildContext context) {
     return Container(
