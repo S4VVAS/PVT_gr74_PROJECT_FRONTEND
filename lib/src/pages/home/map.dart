@@ -22,18 +22,19 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  Completer<GoogleMapController> _completer = new Completer();
+  Completer<GoogleMapController> _completer;
   GoogleMapController _controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   final FirestoreService _firestoreService = FirestoreService();
 
   List<Place> places = new List<Place>();
+  List<Place> closePlaces = [];
   List<GeoPoint> visited = new List<GeoPoint>();
   int _markerIdCounter = 1;
   MarkerId selectedMarker;
 
-  static LatLng _userPosition;
-  static LatLng _lastCall;
+  LatLng _userPosition;
+  LatLng _lastCall;
 
   double placeSeenColor = BitmapDescriptor.hueYellow;
   double placeNotSeenColor = BitmapDescriptor.hueGreen;
@@ -45,10 +46,11 @@ class _MapPageState extends State<MapPage> {
 
   double _zoom = 16.0;
 
-
   @override
   void initState() {
     super.initState();
+    _completer = new Completer();
+
     //ERROR_ALREADY_REQUESTING_PERMISSIONS
     positionStream =
         _geolocator.getPositionStream(locationOptions).listen((position) {
@@ -66,13 +68,16 @@ class _MapPageState extends State<MapPage> {
         print("updating places");
         await _completer.future.then((controller) => _controller = controller);
 
+        LatLngBounds placeArea = getBigAreaAroundUser(_userPosition); 
+        await PlaceRepository().getBoundedPlaces(placeArea).then((updated) => updatePlaces(updated));
+
         if (_completer.isCompleted) {
-          _controller?.getVisibleRegion()?.then(((bounds) async {
+          /*_controller?.getVisibleRegion()?.then(((bounds) async {
             print(bounds.toString());
             await PlaceRepository()
                 .getBoundedPlaces(bounds)
                 .then((updated) => updatePlaces(updated));
-          }));
+          }));*/          
         }
       }
     });
@@ -106,6 +111,18 @@ class _MapPageState extends State<MapPage> {
         setMarkers();
       });
     }
+  }
+
+  LatLngBounds getBigAreaAroundUser(LatLng position) {
+      const double w = .007;
+      const double h = .006;
+      
+      LatLng sw = LatLng(position.latitude - h, position.longitude - w);
+      LatLng ne = LatLng(position.latitude + h, position.longitude + w);
+      double latDiff = ne.latitude - sw.latitude; 
+      double lngDiff = ne.longitude - sw.longitude;
+      print("Area showing places is \nlat: $latDiff degrees \nlng: $lngDiff degrees");
+      return new LatLngBounds(southwest: sw, northeast: ne);
   }
 
   @override
@@ -182,7 +199,7 @@ class _MapPageState extends State<MapPage> {
     _markerIdCounter++;
     final MarkerId markerId = MarkerId(markerIdVal);
 
-    bool visited = await hasVisited(place);
+    bool visited = hasVisited(place);
     double iconColor = visited ? placeSeenColor : placeNotSeenColor;
 
     final Marker marker = Marker(
@@ -208,26 +225,33 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  //TODO: saveAsVisited och hasVisited bör nog dels ligga i annan klass (user?)
-  // och dels köras vid appstart eller  inloggning.
-  // Kanske går att använda userID från firebase-usern på något sätt så det blir
-  // unikt för användaren ist för devicen?
-  Future<void> saveAsVisited(Place place) async {
+  
+  void saveAsVisited(Place place) {
     User user = Globals.instance.user;
-    visited.add(GeoPoint(place.position.latitude, place.position.longitude));
-    user.visited = visited; 
+    user.visited.add(GeoPoint(place.position.latitude, place.position.longitude)); 
     //user.level = 240;
     print(user.name + " visited places coords: " + user.visited.toString());
-    await _firestoreService.updateUser(user).then((value) => print("done"));
+    //await _firestoreService.updateUser(user).then((value) => print("done"));
     
     /*SharedPreferences prefs = await SharedPreferences.getInstance();
     // Value används ej, därav -> "".
     await prefs.setString(position.toString(), "");*/
   }
 
-  Future<bool> hasVisited(Place place) async {
-    /* User user = Globals.instance.user;
-    User tmpUser = await _firestoreService.getUser(user.id);
+  bool hasVisited(Place place) {
+   /*  User user = Globals.instance.user;
+    print("visited places: " + user.visited.toString());
+    print(place.position);
+    if (user.visited.contains(place.position)) {
+      print("visited!");
+      //user.visited.add(GeoPoint(place.position.latitude, place.position.longitude));
+      return true;
+    } else {
+      print("not visited!");
+    } */
+
+    return false;
+    /* User tmpUser = await _firestoreService.getUser(user.id);
     if(tmpUser == null){
       print('TmpUser is NULL');
     }
@@ -237,7 +261,6 @@ class _MapPageState extends State<MapPage> {
       Globals.instance.user = tmpUser;
       return visited;
     } */
-    return false;
     /*
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool visited = prefs.containsKey(position.toString());
