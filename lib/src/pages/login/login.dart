@@ -360,6 +360,7 @@ class _OtherProvidersSignInSectionState
       assert(!user.isAnonymous);
       assert(await user.getIdToken() != null);
 
+      //Kolla om user finns i firestore annars skapa en för den?
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.uid == currentUser.uid);
       if (user != null) {

@@ -1,12 +1,12 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:history_go/src/firestore/firestore_service.dart';
-import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/services/globals.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -14,7 +14,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<GeoPoint> places;
+  //TODO: Använda getPlacesFromCoords i PlaceRepo för att lista platserna ist för koordinaterna.
+  //Behöver nödvändigtvis inte göras här, är nog snyggare att abstrahera det till firestore_service klassen eller nåt.
+  List<String> places;
   final FirestoreService _firestoreService = FirestoreService();
 
   String _message = 'Du har inga besökta platser än, eller så laddas dem!';
@@ -38,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _getPlaces() async {
     User user = Globals.instance.user;
-    if(user != null){
+    if (user != null) {
       print('got user to profilePage: ' + user.toString());
       //user = await _firestoreService.getUser(user.id);
       if (user != null) {
@@ -48,12 +50,12 @@ class _ProfilePageState extends State<ProfilePage> {
         });
         print('Gick igenom getPlaces');
 
-        if(places == null){
+        if (places == null) {
           setState(() {
             _message = "ditt konto saknar en platslista...ops";
           });
           print('User does not have a visited field in firestore...');
-        }else if(places.isEmpty){
+        } else if (places.isEmpty) {
           setState(() {
             _message = "Du har inga besökta platser än";
           });
@@ -78,7 +80,6 @@ class _ProfilePageState extends State<ProfilePage> {
               color: Colors.white,
             ),
             onPressed: () {
-              //Navigator.pushNamed(context, '/settings');
               Scaffold.of(context).openEndDrawer();
             },
           )
@@ -94,14 +95,15 @@ class _ProfilePageState extends State<ProfilePage> {
               _profilePicture(),
               places == null
                   ? Container(
-                child: Center(
-                  child: Text(
-                    _message,
-                    style: TextStyle(
-                        fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
-                  ),
-                ),
-              )
+                      child: Center(
+                        child: Text(
+                          _message,
+                          style: TextStyle(
+                              fontFamily: 'Avenir-Medium',
+                              color: Colors.grey[400]),
+                        ),
+                      ),
+                    )
                   :
                   /*
                                   Center(
@@ -109,15 +111,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
 
                    */
-              Expanded(child:
-                ListView.builder(scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: places.length,
-                  itemBuilder: (BuildContext ctxt, int index) {
-                    return new Button("lat: " + places[index].latitude.toString());
-                    }),
-              )
-              ],
+                  Expanded(
+                      child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          itemCount: places.length,
+                          itemBuilder: (BuildContext ctxt, int index) {
+                            return new Button(
+                                "Coord: " + places[index]);
+                          }),
+                    )
+            ],
           ),
         ),
       ),

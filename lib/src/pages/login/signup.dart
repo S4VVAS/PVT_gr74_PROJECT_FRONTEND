@@ -125,13 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
           _success = true;
           _userEmail = user.email;
         });
-        await _firestoreService.createUser(User(
-            name: user.email,
-            id: user.uid,
-            email: user.email,
-            imgUrl: '',
-            level: 1,
-            visited: new List<dynamic>()));
+        await _firestoreService.createUser(user);
       } else {
         _success = false;
       }
