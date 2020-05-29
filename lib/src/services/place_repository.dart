@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:history_go/src/services/api_provider.dart';
@@ -7,23 +8,28 @@ class PlaceRepository {
   ApiProvider _provider = ApiProvider();
 
   Future<List<Place>> getPlaces(LatLng userPosition) async {
-    String _posUrl =
+    String _url =
         'getPlaces?lat=${userPosition.latitude}&lon=${userPosition.longitude}';
-    debugPrint("REQUEST TO API: " + _posUrl);
-    final _response = await _provider.get(_posUrl);
-    List<Place> places = new List();
-    for (var place in _response) {
-      places.add(Place.fromJson(place));
-    }
-    debugPrint("getPlaces returned ${places.length} places");
-
-    return places;
+    return _toApi(_url);
   }
 
   Future<List<Place>> getBoundedPlaces(LatLngBounds bounds) async {
     String _url =
         'getBoundedPlaces?swLat=${bounds.southwest.latitude}&swLon=${bounds.southwest.longitude}' +
             '&neLat=${bounds.northeast.latitude}&neLon=${bounds.northeast.longitude}';
+    return _toApi(_url);
+  }
+
+  Future<List<Place>> getPlacesFromCoords(List<String> coords) {
+    String _url = 'getCoorPlaces?coors=';
+    for (int i = 0; i < coords.length; i++) {
+      print(coords[i]);
+      _url += '${coords[i]}' + (i < coords.length - 1 ? ',' : '');
+    }
+    return _toApi(_url);
+  }
+
+  Future<List<Place>> _toApi(String _url) async {
     debugPrint('REQUEST TO API: ' + _url);
     final _response = await _provider.get(_url);
     List<Place> places = new List();
