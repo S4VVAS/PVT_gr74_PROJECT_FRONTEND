@@ -23,7 +23,6 @@ class ApiProvider {
     switch (response.statusCode) {
       case 200:
         var responseJson = json.decode(utf8.decode(response.bodyBytes));
-        print(responseJson);
         return responseJson;
       case 400:
         throw BadRequestException(response.body.toString());

@@ -6,7 +6,7 @@ class NewMissionPage extends StatelessWidget {
     return Hero(
       tag: 'infoPic',
       child: SizedBox(
-          height: 350.0,
+          height: 300.0,
           width: 280.0,
           //child: Image.asset('',  fit: BoxFit.cover)
       ),
@@ -50,7 +50,7 @@ class NewMissionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(text: "Stockholms blodbad"),
+      appBar: CustomAppBar(text: "Stockholms blodbad", backButton: true,),
       body: Center(
         child: Container(
           width: MediaQuery

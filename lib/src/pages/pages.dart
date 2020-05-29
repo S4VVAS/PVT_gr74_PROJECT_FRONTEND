@@ -6,7 +6,6 @@ export 'home/new_mission.dart';
 export 'home/permissions.dart';
 export 'home/profile.dart';
 export 'home/search.dart';
-export 'home/settings.dart';
 export 'login/login.dart';
 export 'login/signup.dart';
 export 'login/welcome.dart';

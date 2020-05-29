@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:history_go/src/theme/style.dart';
 
-class CustomAppBar extends AppBar {
-  //Ändra till statelesswidget och returnera egen appbar istället.
-  CustomAppBar({this.text = "", this.actions, this.centerTitle = true, this.backButton = false})
-      : super(
-          title: Text(text, style: appTheme().textTheme.headline4),
-          actions: actions,
-          centerTitle: centerTitle,
-          leading: backButton ? BackButton() : null,
-        );
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  CustomAppBar({this.text = "", this.actions, this.centerTitle = true, this.backButton = false});
   final String text;
+  final double height = AppBar().preferredSize.height;
   final List<Widget> actions;
   final bool centerTitle;
   final bool backButton;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: Text(text, style: Theme.of(context).textTheme.headline4),
+      actions: actions,
+      centerTitle: centerTitle,
+      leading: backButton? new BackButton() : null,
+      automaticallyImplyLeading: false,
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(height);
 }

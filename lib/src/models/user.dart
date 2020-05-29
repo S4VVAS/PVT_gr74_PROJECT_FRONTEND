@@ -1,15 +1,42 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserInfo {
-  static String name;
-  static String id;
-  static String email;
-  static String imgUrl;
-  static Image img;
-  UserInfo();
+class User {
+  String name;
+  String id;
+  String email;
+  String imgUrl;
+  int level;
+  List<GeoPoint> visited;
+
+  User({this.name, this.id, this.email, this.imgUrl, this.level, this.visited});
+
+  User.fromData(Map<String, dynamic> data) {
+    name = data['name'];
+    id = data['id'];
+    email = data['email'];
+    imgUrl = data['imgUrl'];
+    level = data['level'];
+    if (data['visited'] != null) {
+      visited = new List<GeoPoint>();
+      data['visited'].forEach((v) {
+        visited.add(v);
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'id': id,
+      'email': email,
+      'imgUrl': imgUrl,
+      'level': level,
+      'visited': visited,
+    };
+  }
 
   @override
   String toString() {
-    return "name: " + name;
+    return "name: " + name + " id: " + id;
   }
 }

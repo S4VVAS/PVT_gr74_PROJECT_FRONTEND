@@ -1,22 +1,69 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:history_go/src/components/buttons.dart';
+import 'package:history_go/src/components/custom_app_bar.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
+import 'package:history_go/src/models/place.dart';
+import 'package:history_go/src/models/user.dart';
+import 'package:history_go/src/services/globals.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
 
-class ProfilePage extends StatelessWidget {
+class _ProfilePageState extends State<ProfilePage> {
+  List<GeoPoint> places;
+  final FirestoreService _firestoreService = FirestoreService();
+
+  String _message = 'Du har inga besökta platser än, eller så laddas dem!';
+
+  @override
+  void initState() {
+    super.initState();
+    _getPlaces();
+  }
 
   Widget _profilePicture() {
-    return Hero(
-      tag: 'profilBild',
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: CircleAvatar(
-          radius: 120.0,
-          backgroundColor: Colors.transparent,
-          backgroundImage: AssetImage('assets/kaknas.jpg'),
-        ),
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: CircleAvatar(
+        radius: 120.0,
+        backgroundColor: Colors.transparent,
+        backgroundImage: AssetImage('assets/profil.png'),
       ),
     );
+  }
+
+  Future<void> _getPlaces() async {
+    User user = Globals.instance.user;
+    if(user != null){
+      print('got user to profilePage: ' + user.toString());
+      //user = await _firestoreService.getUser(user.id);
+      if (user != null) {
+        //Globals.instance.user = user;
+        setState(() {
+          places = user.visited;
+        });
+        print('Gick igenom getPlaces');
+
+        if(places == null){
+          setState(() {
+            _message = "ditt konto saknar en platslista...ops";
+          });
+          print('User does not have a visited field in firestore...');
+        }else if(places.isEmpty){
+          setState(() {
+            _message = "Du har inga besökta platser än";
+          });
+        }
+      } else {
+        print('User is null in Getplaces');
+      }
+    } else {
+      print('User is null in Profilpage');
+    }
   }
 
   @override
@@ -45,10 +92,32 @@ class ProfilePage extends StatelessWidget {
           child: Column(
             children: <Widget>[
               _profilePicture(),
-              Button('Mina vänner'),
-              Button('Mina badges'),
-              Button('Mina bidrag'),
-            ],
+              places == null
+                  ? Container(
+                child: Center(
+                  child: Text(
+                    _message,
+                    style: TextStyle(
+                        fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
+                  ),
+                ),
+              )
+                  :
+                  /*
+                                  Center(
+                  child: Text('Besökta platser: '),
+                ),
+
+                   */
+              Expanded(child:
+                ListView.builder(scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: places.length,
+                  itemBuilder: (BuildContext ctxt, int index) {
+                    return new Button("lat: " + places[index].latitude.toString());
+                    }),
+              )
+              ],
           ),
         ),
       ),

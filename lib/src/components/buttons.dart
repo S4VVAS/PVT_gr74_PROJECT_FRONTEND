@@ -23,8 +23,7 @@ class Button extends StatelessWidget {
         onPressed: () {
           if (route != null) {
             Navigator.of(context).pushNamed(route);
-          } else if (onPressed != null)
-            return onPressed.call();
+          } else if (onPressed != null) return onPressed.call();
           return;
         },
         shape: ContinuousRectangleBorder(
@@ -54,7 +53,8 @@ class SignOutButton extends StatelessWidget {
         try {
           _auth.signOut().whenComplete(() {
             print('Signed out Successfully');
-            Navigator.pushNamedAndRemoveUntil(context, '/welcome', ModalRoute.withName('/'));
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/welcome', ModalRoute.withName('/'));
           });
         } catch (e) {
           print('Could not sign out\n' + e);
@@ -85,6 +85,95 @@ class CustomBackButton extends StatelessWidget {
             Text('Back',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500))
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class MapSettingsButton extends StatelessWidget {
+  MapSettingsButton({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 32,
+      width: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            offset: Offset(2, 2),
+            blurRadius: 2,
+            spreadRadius: 1,
+          )
+        ],
+      ),
+      child: IconButton(
+        onPressed: () {
+          Scaffold.of(context).openEndDrawer();
+        },
+        padding: EdgeInsets.zero,
+        icon: Icon(
+          Icons.settings,
+          color: Colors.grey[800],
+        ),
+      ),
+    );
+  }
+}
+
+class WelcomeButton extends StatelessWidget {
+  WelcomeButton(
+      {this.text,
+      this.filled,
+      this.onTap,
+      this.color,
+      this.textColor,
+      this.gradient})
+      : _filledBox = new BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+                color: color.withAlpha(255),
+                offset: Offset(2, 4),
+                blurRadius: 8,
+                spreadRadius: 2)
+          ],
+          gradient: gradient ?? null,
+        ),
+        _unfilledBox = new BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          border: Border.all(color: Colors.white, width: 2),
+        );
+
+  final String text;
+  final bool filled;
+  final GestureTapCallback onTap;
+  final Color color;
+  final Color textColor;
+  final Gradient gradient;
+  final BoxDecoration _filledBox;
+  final BoxDecoration _unfilledBox;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.center,
+        decoration: filled ? _filledBox : _unfilledBox,
+        child: Text(
+          text,
+          style: Theme.of(context)
+              .textTheme
+              .button
+              .copyWith(fontSize: 20, color: textColor ?? Colors.white),
         ),
       ),
     );

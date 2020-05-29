@@ -66,7 +66,9 @@ class InfoPage extends StatelessWidget {
       return noPlacePage(context);
     else {
       return Scaffold(
-        appBar: CustomAppBar(),
+        appBar: CustomAppBar(
+          backButton: true,
+        ),
         body: Center(
           child: Container(
             width: MediaQuery.of(context).size.width,
