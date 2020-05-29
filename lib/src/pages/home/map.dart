@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,9 +10,6 @@ import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
 import 'package:history_go/src/components/buttons.dart';
-
-/*const double CAMERA_TILT = 80;
-const double CAMERA_BEARING = 30;*/
 
 class MapPage extends StatefulWidget {
   MapPage({Key key, this.title}) : super(key: key);
@@ -27,9 +25,10 @@ class _MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   final FirestoreService _firestoreService = FirestoreService();
 
-  List<Place> places = new List<Place>();
-  List<Place> closePlaces = [];
-  List<GeoPoint> visited = new List<GeoPoint>();
+  HashSet<Place> places = new HashSet();
+  HashSet<Place> nearbyPlaces = HashSet();
+  LatLngBounds _nearbyUserArea;
+
   int _markerIdCounter = 1;
   MarkerId selectedMarker;
 
@@ -37,12 +36,13 @@ class _MapPageState extends State<MapPage> {
   LatLng _lastCall;
 
   double placeSeenColor = BitmapDescriptor.hueYellow;
+  double placeNearbyColor = BitmapDescriptor.hueRed;
   double placeNotSeenColor = BitmapDescriptor.hueGreen;
 
   StreamSubscription positionStream;
   Geolocator _geolocator = Geolocator();
-  LocationOptions locationOptions = LocationOptions(
-      accuracy: LocationAccuracy.high, distanceFilter: 10);
+  LocationOptions locationOptions =
+      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 5);
 
   double _zoom = 16.0;
 
@@ -51,7 +51,7 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     _completer = new Completer();
 
-    //ERROR_ALREADY_REQUESTING_PERMISSIONS
+    //ERROR_ALREADY_REQUESTING_PERMISSIONS - verkar ha försvunnit?
     positionStream =
         _geolocator.getPositionStream(locationOptions).listen((position) {
       setState(() {
@@ -63,66 +63,87 @@ class _MapPageState extends State<MapPage> {
 
   void userMoveHandler() async {
     await _completer.future.then((controller) => _controller = controller);
-    shouldUpdatePlaces().then((result) async {
-      if (result) {
-        print("updating places");
-        await _completer.future.then((controller) => _controller = controller);
 
-        LatLngBounds placeArea = getBigAreaAroundUser(_userPosition); 
-        await PlaceRepository().getBoundedPlaces(placeArea).then((updated) => updatePlaces(updated));
+    updatePlaces();
 
-        if (_completer.isCompleted) {
-          /*_controller?.getVisibleRegion()?.then(((bounds) async {
-            print(bounds.toString());
-            await PlaceRepository()
-                .getBoundedPlaces(bounds)
-                .then((updated) => updatePlaces(updated));
-          }));*/          
-        }
-      }
-    });
-    _controller?.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: _userPosition, zoom: await _controller.getZoomLevel())));
+    if (_completer.isCompleted)
+      _controller.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: _userPosition, zoom: await _controller.getZoomLevel())));
   }
 
-  Future<bool> shouldUpdatePlaces() async {
+  Future<bool> shouldUpdateShownPlaces() async {
     if (_lastCall == null) {
       print("first");
       _lastCall = _userPosition;
       return true;
     }
     if (_lastCall == _userPosition) return false;
-
-    double distance = await _geolocator.distanceBetween(_lastCall.latitude,
-        _lastCall.longitude, _userPosition.latitude, _userPosition.longitude);
+    double distance = await distanceBetween(_lastCall, _userPosition);
     print(distance);
-
-    return distance > 100;
+    return distance > 150;
   }
 
-  void updatePlaces(List updated) {
-    _lastCall = _userPosition;
+  Future<double> distanceBetween(LatLng first, LatLng second) async {
+    double distance = await _geolocator.distanceBetween(
+        first.latitude, first.longitude, second.latitude, second.longitude);
+    return Future.value(distance);
+  }
+
+  void updatePlaces() async {
     print(this.toDiagnosticsNode().toString() +
         " \nis mounted:" +
         this.mounted.toString());
     if (this.mounted) {
-      setState(() {
-        places = updated;
-        setMarkers();
+      shouldUpdateShownPlaces().then((result) {
+        if (result) {
+          print("updating places");
+          PlaceRepository()
+              .getBoundedPlaces(getAreaAroundUser(_userPosition, Size.big))
+              .then((updated) {
+            _lastCall = _userPosition;
+            setState(() {
+              places = updated;
+            });
+            updateNearbyPlaces();
+            setMarkers();
+          });
+        } else {
+          updateNearbyPlaces();
+          setMarkers();
+        }
       });
     }
   }
 
-  LatLngBounds getBigAreaAroundUser(LatLng position) {
-      const double w = .007;
-      const double h = .006;
-      
-      LatLng sw = LatLng(position.latitude - h, position.longitude - w);
-      LatLng ne = LatLng(position.latitude + h, position.longitude + w);
-      double latDiff = ne.latitude - sw.latitude; 
-      double lngDiff = ne.longitude - sw.longitude;
-      print("Area showing places is \nlat: $latDiff degrees \nlng: $lngDiff degrees");
-      return new LatLngBounds(southwest: sw, northeast: ne);
+  void updateNearbyPlaces() {
+    print("updating nearby places");
+    if (this.mounted) {
+      _nearbyUserArea = getAreaAroundUser(_userPosition, Size.small);
+      HashSet<Place> temp = HashSet.from(
+          places.where((p) => _nearbyUserArea.contains(p.position)));
+      print(temp.length);
+      setState(() {
+        nearbyPlaces = temp;
+      });
+    }
+  }
+
+  LatLngBounds getAreaAroundUser(LatLng position, Size size) {
+    double w;
+    double h;
+    switch (size) {
+      case Size.big:
+        w = .015;
+        h = .007;
+        break;
+      case Size.small:
+        w = .0016;
+        h = .0008;
+        break;
+    }
+    LatLng sw = LatLng(position.latitude - h, position.longitude - w);
+    LatLng ne = LatLng(position.latitude + h, position.longitude + w);
+    return new LatLngBounds(southwest: sw, northeast: ne);
   }
 
   @override
@@ -194,13 +215,15 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  void addMarker(Place place) async {
+  void addMarker(Place place) {
     final String markerIdVal = 'marker_id_$_markerIdCounter';
     _markerIdCounter++;
     final MarkerId markerId = MarkerId(markerIdVal);
 
+    bool nearby = nearbyPlaces.contains(place);
     bool visited = hasVisited(place);
-    double iconColor = visited ? placeSeenColor : placeNotSeenColor;
+    double iconColor = nearby ? placeNearbyColor : placeNotSeenColor;
+    if (visited) iconColor = placeSeenColor;
 
     final Marker marker = Marker(
         markerId: markerId,
@@ -208,9 +231,12 @@ class _MapPageState extends State<MapPage> {
         icon: BitmapDescriptor.defaultMarkerWithHue(iconColor),
         consumeTapEvents: true,
         onTap: () {
+          print("Nearby contains place? ${nearbyPlaces.contains(place)}");
+          if (nearbyPlaces.contains(place)) {
             _onMarkerTapped(markerId);
             saveAsVisited(place);
             Navigator.pushNamed(context, "/info", arguments: place);
+          }
         });
     setState(() {
       markers[markerId] = marker;
@@ -225,46 +251,18 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  
   void saveAsVisited(Place place) {
     User user = Globals.instance.user;
-    user.visited.add(GeoPoint(place.position.latitude, place.position.longitude)); 
-    //user.level = 240;
-    print(user.name + " visited places coords: " + user.visited.toString());
-    //await _firestoreService.updateUser(user).then((value) => print("done"));
-    
-    /*SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Value används ej, därav -> "".
-    await prefs.setString(position.toString(), "");*/
+    HashSet<String> visitedSet = HashSet.from(user.visited);
+    if (!visitedSet.contains(place.getPositionStr())) {
+      user.visited.add(place.getPositionStr());
+    }
+    _firestoreService.updateUser(user);
   }
 
   bool hasVisited(Place place) {
-   /*  User user = Globals.instance.user;
-    print("visited places: " + user.visited.toString());
-    print(place.position);
-    if (user.visited.contains(place.position)) {
-      print("visited!");
-      //user.visited.add(GeoPoint(place.position.latitude, place.position.longitude));
-      return true;
-    } else {
-      print("not visited!");
-    } */
-
-    return false;
-    /* User tmpUser = await _firestoreService.getUser(user.id);
-    if(tmpUser == null){
-      print('TmpUser is NULL');
-    }
-    else {
-      List<Place> places = tmpUser.visited;
-      bool visited = places.contains(place);
-      Globals.instance.user = tmpUser;
-      return visited;
-    } */
-    /*
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool visited = prefs.containsKey(position.toString());
-    return Future<bool>.value(visited);*/
+    User user = Globals.instance.user;
+    return user.visited.contains(place.getPositionStr());
   }
 
   LatLng _toLatLng(Position p) {
@@ -280,3 +278,5 @@ class _MapPageState extends State<MapPage> {
     super.dispose();
   }
 }
+
+enum Size { big, small }
