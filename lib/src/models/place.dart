@@ -37,9 +37,13 @@ class Place {
     return images;
   }
 
+  String getPositionStr() {
+    return "${position.latitude} ${position.longitude}";
+  }
+
   @override
   String toString() {
-    return "Place position: $position, entries:\n$entries";
+    return "Place position: $position, ${entries.length} entries";
   }
 
   @override

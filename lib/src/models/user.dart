@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
@@ -6,7 +8,7 @@ class User {
   String email;
   String imgUrl;
   int level;
-  List<GeoPoint> visited;
+  List<String> visited;
 
   User({this.name, this.id, this.email, this.imgUrl, this.level, this.visited});
 
@@ -17,7 +19,7 @@ class User {
     imgUrl = data['imgUrl'];
     level = data['level'];
     if (data['visited'] != null) {
-      visited = new List<GeoPoint>();
+      visited = new List<String>();
       data['visited'].forEach((v) {
         visited.add(v);
       });
