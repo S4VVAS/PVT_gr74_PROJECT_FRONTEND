@@ -41,6 +41,17 @@ class Place {
   String toString() {
     return "Place position: $position, entries:\n$entries";
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Place &&
+              runtimeType == other.runtimeType &&
+              position == other.position;
+
+  @override
+  int get hashCode => position.hashCode;
+
 }
 
 class Entries {

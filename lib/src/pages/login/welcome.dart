@@ -17,6 +17,7 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   //User get currentUser => _currentUser;
   final FirestoreService _firestoreService = FirestoreService();
+  bool _populatedUser = false;
 
   @override
   void initState() {
@@ -86,8 +87,15 @@ class _WelcomePageState extends State<WelcomePage> {
           FirebaseUser user = snapshot.data;
           if (user == null) {
             return _welcomePage();
+          }else if (_populatedUser){
+            return HomePage();
+          } else {
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           }
-          return HomePage();
         } else {
           return Scaffold(
             body: Center(
@@ -104,11 +112,14 @@ class _WelcomePageState extends State<WelcomePage> {
     if (user != null) {
       await _firestoreService.getUser(user.uid).then((user) {
         
-        print("Populated user " + user.id);
         Globals.instance.user = user;
+        setState(() {
+          _populatedUser = true;
+        });
+        print("Populated user " + user.id);
       });
     } else {
-      print('User was NULL');
+      print('User was NULL. Could not populate user!!');
     }
   }
 }

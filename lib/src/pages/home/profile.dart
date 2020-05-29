@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
@@ -13,8 +14,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<dynamic> places;
+  List<GeoPoint> places;
   final FirestoreService _firestoreService = FirestoreService();
+
+  String _message = 'Du har inga besökta platser än, eller så laddas dem!';
 
   @override
   void initState() {
@@ -34,33 +37,33 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _getPlaces() async {
-
     User user = Globals.instance.user;
-    if(user == null){
-      print('User is null in Profilpage');
-    }
-    else {
-      user = await _firestoreService.getUser(user.id);
-      if (user == null) {
+    if(user != null){
+      print('got user to profilePage: ' + user.toString());
+      //user = await _firestoreService.getUser(user.id);
+      if (user != null) {
+        //Globals.instance.user = user;
+        setState(() {
+          places = user.visited;
+        });
+        print('Gick igenom getPlaces');
+
+        if(places == null){
+          setState(() {
+            _message = "ditt konto saknar en platslista...ops";
+          });
+          print('User does not have a visited field in firestore...');
+        }else if(places.isEmpty){
+          setState(() {
+            _message = "Du har inga besökta platser än";
+          });
+        }
+      } else {
         print('User is null in Getplaces');
       }
-      else {
-        Globals.instance.user = user;
-        places = Globals.instance.user.visited;
-        print('Gick igenom getPlaces');
-      }
+    } else {
+      print('User is null in Profilpage');
     }
-    /*
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Set<String> keys = prefs.getKeys();
-    List<String> visitedPlaces = new List<String>();
-
-    for (String str in keys) {
-      visitedPlaces.add(str);
-    }
-    }
-    places = visitedPlaces;
-    print(places.length);*/
   }
 
   @override
@@ -93,23 +96,28 @@ class _ProfilePageState extends State<ProfilePage> {
                   ? Container(
                 child: Center(
                   child: Text(
-                    'Du har inga besökta platser än, eller så laddas dem!',
+                    _message,
                     style: TextStyle(
                         fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
                   ),
                 ),
               )
-                  : {
-                Center(
+                  :
+                  /*
+                                  Center(
                   child: Text('Besökta platser: '),
                 ),
+
+                   */
+              Expanded(child:
                 ListView.builder(scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: places.length,
-                    itemBuilder: (BuildContext ctxt, int index) {
-                      return new Button(places[index].toString());
-                    })
-              }],
+                  shrinkWrap: true,
+                  itemCount: places.length,
+                  itemBuilder: (BuildContext ctxt, int index) {
+                    return new Button("lat: " + places[index].latitude.toString());
+                    }),
+              )
+              ],
           ),
         ),
       ),
