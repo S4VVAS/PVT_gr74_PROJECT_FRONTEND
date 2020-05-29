@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/firestore/firestore_service.dart';
-import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/pages/pages.dart';
 import 'package:history_go/src/services/globals.dart';
 
@@ -18,59 +17,12 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   //User get currentUser => _currentUser;
   final FirestoreService _firestoreService = FirestoreService();
+  bool _populatedUser = false;
 
   @override
   void initState() {
     super.initState();
     _populateCurrentUser();
-  }
-
-  Widget _loginButton() {
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/login');
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                  color: Colors.deepPurple[300],
-                  offset: Offset(2, 4),
-                  blurRadius: 8,
-                  spreadRadius: 2)
-            ],
-            color: Colors.white),
-        child: Text(
-          'Login',
-          style: TextStyle(fontSize: 20, color: Colors.deepPurple),
-        ),
-      ),
-    );
-  }
-
-  Widget _signUpButton() {
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/signup');
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 13),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          border: Border.all(color: Colors.white, width: 2),
-        ),
-        child: Text(
-          'Sign up',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
   }
 
   Widget _welcomePage() {
@@ -135,8 +87,15 @@ class _WelcomePageState extends State<WelcomePage> {
           FirebaseUser user = snapshot.data;
           if (user == null) {
             return _welcomePage();
+          }else if (_populatedUser){
+            return HomePage();
+          } else {
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           }
-          return HomePage();
         } else {
           return Scaffold(
             body: Center(
@@ -153,12 +112,14 @@ class _WelcomePageState extends State<WelcomePage> {
     if (user != null) {
       await _firestoreService.getUser(user.uid).then((user) {
 
-        print("Populated user " + user.id);
         Globals.instance.user = user;
+        setState(() {
+          _populatedUser = true;
+        });
+        print("Populated user " + user.id);
       });
     } else {
-      print('User was NULL');
+      print('User was NULL. Could not populate user!!');
     }
   }
 }
-

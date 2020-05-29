@@ -48,8 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
       else {
         Globals.instance.user = user;
         places = Globals.instance.user.visited;
-        entryList = places.entries.toList();
-        print(entryList[0]);
+        entryList = places.keys.toList();
         print('Gick igenom getPlaces');
       }
     }

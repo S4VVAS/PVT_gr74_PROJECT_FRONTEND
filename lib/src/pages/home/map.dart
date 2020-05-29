@@ -215,7 +215,8 @@ class _MapPageState extends State<MapPage> {
   // unikt för användaren ist för devicen?
   Future<void> saveAsVisited(Place place) async {
     User user = Globals.instance.user;
-    user.visited[place.entries.toString()] = GeoPoint(place.position.latitude, place.position.longitude);
+    print('DESC' + place.entries[0].desc);
+    user.visited[place.entries[0].desc] = GeoPoint(place.position.latitude, place.position.longitude);
     //user.visited.add(GeoPoint(place.position.latitude, place.position.longitude));
     //user.visited = visited;
     //user.level = 240;
