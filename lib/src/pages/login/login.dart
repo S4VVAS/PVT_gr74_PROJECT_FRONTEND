@@ -9,6 +9,7 @@ import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/pages/pages.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+String _message = '';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -195,6 +196,14 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
             height: 20,
           ),
           Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(
+              _message,
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          Container(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               alignment: Alignment.center,
               child: WelcomeButton(
@@ -203,39 +212,33 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
                   filled: true,
                   onTap: () async {
                     if (_formKey.currentState.validate()) {
+                      _resetErrorMessage();
                       _signInWithEmailAndPassword();
                     }
                   },
                   gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: [Color(0xfffbb448),
-                       Color(0xfff7892b)]))),
-          Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              _success == null
-                  ? ''
-                  : (_success
-                      ? 'Successfully signed in ' + _userEmail
-                      : 'Sign in failed'),
-              style: TextStyle(color: Colors.red),
-            ),
-          )
+                      colors: [Color(0xfffbb448), Color(0xfff7892b)]))),
         ],
       ),
     );
   }
 
   void _signInWithEmailAndPassword() async {
-    final FirebaseUser user = (await _auth
-            .signInWithEmailAndPassword(
-              email: _emailController.text,
-              password: _passwordController.text,
-            )
-            .catchError((error) => print(error)))
-        .user;
+    FirebaseUser user;
+    try {
+      user = (await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      ))
+          .user;
+    } on PlatformException catch (e) {
+      print(e);
+      _setErrorMessage(e.message);
+    } catch (e) {
+      print(e);
+    }
     if (user != null) {
       setState(() {
         _success = true;
@@ -244,9 +247,8 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         Navigator.pushNamedAndRemoveUntil(
             context, '/home', ModalRoute.withName('/'));
       });
-    } else {
+    } else
       _success = false;
-    }
   }
 
   @override
@@ -255,6 +257,18 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
     _passwordController.dispose();
     focus.dispose();
     super.dispose();
+  }
+
+  void _setErrorMessage(String message) {
+    if (message != null) {
+      setState(() {
+        _message = message;
+      });
+    }
+  }
+
+  void _resetErrorMessage() {
+    _setErrorMessage(' ');
   }
 }
 
@@ -269,8 +283,6 @@ class _OtherProvidersSignInSectionState
     extends State<_OtherProvidersSignInSection> {
   final facebookLogin = FacebookLogin();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-
-  String _message = '';
 
   @override
   Widget build(BuildContext context) {
