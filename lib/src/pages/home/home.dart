@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage>
     Tab(icon: Icon(Icons.map), text: 'KARTA'),
     Tab(icon: Icon(Icons.local_play), text: 'UPPDRAG'),
     Tab(icon: Icon(Icons.person), text: 'PROFIL'),
-    Tab(icon: Icon(Icons.search), text: 'SÖK'),
+    //Tab(icon: Icon(Icons.search), text: 'SÖK'),
   ];
 
   TabController _tabController;
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage>
                 MapPage(),
                 MissionsPage(),
                 ProfilePage(),
-                SearchPage(),
+                //SearchPage(),
               ],
             ),
             endDrawer: CustomDrawer(),
