@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/pages/pages.dart';
 import 'package:history_go/src/components/drawer.dart';
 
@@ -22,9 +23,17 @@ class _HomePageState extends State<HomePage>
   TabController _tabController;
   int selectedIndex = 0;
 
+  LocationPermissionHandler _permissionHandler = LocationPermissionHandler();
+  bool hasPermission;
+
   @override
   initState() {
     super.initState();
+    _permissionHandler.hasPermission().then((value) {
+      setState(() {
+        hasPermission = value;
+      });
+    });
     _tabController = TabController(
       vsync: this,
       length: tabs.length,
@@ -47,33 +56,55 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: TabBar(
-        labelColor: Theme.of(context).primaryColor,
-        labelStyle: TextStyle(fontSize: 12, color: Colors.black),
-        unselectedLabelColor: Theme.of(context).primaryColorLight,
-        indicator: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).primaryColor,
-              width: 3.0,
+    return hasPermission != null && hasPermission
+        ? Scaffold(
+            bottomNavigationBar: TabBar(
+              labelColor: Theme.of(context).primaryColor,
+              labelStyle: TextStyle(fontSize: 12, color: Colors.black),
+              unselectedLabelColor: Theme.of(context).primaryColorLight,
+              indicator: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 3.0,
+                  ),
+                ),
+              ),
+              controller: _tabController,
+              tabs: tabs,
             ),
-          ),
-        ),
-        controller: _tabController,
-        tabs: tabs,
-      ),
-      body: IndexedStack(
-        index: selectedIndex,
-        children: [
-          MapPage(),
-          MissionsPage(),
-          ProfilePage(),
-          SearchPage(),
-        ],
-      ),
-      endDrawer: CustomDrawer(),
-      endDrawerEnableOpenDragGesture: false,
-    );
+            body: IndexedStack(
+              index: selectedIndex,
+              children: [
+                MapPage(),
+                MissionsPage(),
+                ProfilePage(),
+                SearchPage(),
+              ],
+            ),
+            endDrawer: CustomDrawer(),
+            endDrawerEnableOpenDragGesture: false,
+          )
+        : Container(
+            color: Colors.white,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text("Location permission required",
+                      style: Theme.of(context).textTheme.bodyText2),
+                  Button(
+                    "Request permission",
+                    onPressed: () {
+                      _permissionHandler.askPermission().whenComplete(() {
+                        _permissionHandler
+                            .hasPermission()
+                            .then((value) => setState(() {
+                                  hasPermission = value;
+                                }));
+                      });
+                    },
+                  )
+                ]));
   }
 }
