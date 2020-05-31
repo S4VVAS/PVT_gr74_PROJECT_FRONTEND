@@ -10,6 +10,7 @@ import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
 import 'package:history_go/src/components/buttons.dart';
+import 'package:history_go/src/pages/pages.dart';
 
 class MapPage extends StatefulWidget {
   MapPage({Key key, this.title}) : super(key: key);
@@ -42,7 +43,7 @@ class _MapPageState extends State<MapPage> {
   StreamSubscription positionStream;
   Geolocator _geolocator = Geolocator();
   LocationOptions locationOptions =
-      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 5);
+      LocationOptions(accuracy: LocationAccuracy.best, distanceFilter: 5);
 
   double _zoom = 16.0;
 
@@ -51,7 +52,7 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     _completer = new Completer();
 
-    //ERROR_ALREADY_REQUESTING_PERMISSIONS - verkar ha försvunnit?
+    print("Starting stream");
     positionStream =
         _geolocator.getPositionStream(locationOptions).listen((position) {
       setState(() {
@@ -232,10 +233,13 @@ class _MapPageState extends State<MapPage> {
         consumeTapEvents: true,
         onTap: () {
           print("Nearby contains place? ${nearbyPlaces.contains(place)}");
-          if (nearbyPlaces.contains(place)) {
+          if (nearby || visited) {
             _onMarkerTapped(markerId);
             saveAsVisited(place);
-            Navigator.pushNamed(context, "/info", arguments: place);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => InfoPage(place)));
           }
         });
     setState(() {

@@ -165,7 +165,7 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         children: <Widget>[
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'E-postadress'),
             textInputAction: TextInputAction.next,
             keyboardType: TextInputType.emailAddress,
             onFieldSubmitted: (v) {
@@ -173,9 +173,9 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
             },
             validator: (String value) {
               if (value.isEmpty) {
-                return 'Vänligen ange email';
+                return 'Vänligen ange e-postadress';
               } else if (!Validator.validateEmail(value)) {
-                return 'Vänligen ange giltig email';
+                return 'Vänligen ange giltig e-postadress';
               }
               return null;
             },

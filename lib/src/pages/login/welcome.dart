@@ -121,7 +121,7 @@ class _WelcomePageState extends State<WelcomePage> {
         setState(() {
           _isPopulated = true;
         });
-        print("Populated user " + _user?.id);
+        print("Populated user ${_user?.id}");
       });
     } else {
       print('Firebase user was NULL. Could not populate user!!');
