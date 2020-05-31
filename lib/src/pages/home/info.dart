@@ -3,7 +3,6 @@ import 'package:carousel_pro/carousel_pro.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:history_go/src/models/place.dart';
 
-
 class InfoPage extends StatefulWidget {
   InfoPage(this.place);
   final Place place;
@@ -13,7 +12,9 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoPageState extends State<InfoPage> {
-  _InfoPageState(this.place) {first = place.entries[0];}
+  _InfoPageState(this.place) {
+    first = place.entries[0];
+  }
   final Place place;
   Entries first;
   String title;
@@ -24,18 +25,15 @@ class _InfoPageState extends State<InfoPage> {
   @override
   void initState() {
     super.initState();
-    title = first.title;
-    description = first.desc;
-    date = first.date ;
-    photographer = first.name;
+    setText(0);
   }
 
   void setText(int index) {
     setState(() {
       title = place.entries[index].title ?? "Titel saknas";
       description = place.entries[index].desc ?? "Beskrivning saknas";
-      //date = place.entries[index].date ?? "Datum saknas";
-      //photographer = place.entries[index].name ?? "Okänt";
+      date = place.entries[index].date ?? "datum saknas";
+      photographer = place.entries[index].name ?? "okänt";
     });
   }
 
@@ -89,60 +87,29 @@ class _InfoPageState extends State<InfoPage> {
             textAlign: TextAlign.left));
   }
 
-  Widget noPlacePage(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: CustomAppBar(
+        backButton: true,
+      ),
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              Colors.blue,
-              Colors.lightBlueAccent,
-            ]),
-          ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Text('Plats saknas.'),
+              Expanded(
+                child: _infoPicture(),
+              ),
+              Expanded(
+                child: _infoText(),
+              ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    RouteSettings settings = ModalRoute.of(context).settings;
-
-    //place = settings.arguments;
-
-    if (place == null)
-      return noPlacePage(context);
-    else {
-      return Scaffold(
-        appBar: CustomAppBar(
-          backButton: true,
-        ),
-        body: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: _infoPicture(),
-                ),
-                //TODO: Fix infopage
-                Expanded(
-                  child: _infoText(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
   }
 }

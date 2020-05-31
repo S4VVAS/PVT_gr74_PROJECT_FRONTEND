@@ -88,7 +88,6 @@ class _ProfilePageState extends State<ProfilePage> {
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.all(28.0),
           color: Theme.of(context).backgroundColor,
           child: Column(
             children: <Widget>[
@@ -104,23 +103,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     )
-                  :
-                  /*
-                                  Center(
-                  child: Text('Besökta platser: '),
-                ),
-
-                   */
-                  Expanded(
-                      child: ListView.builder(
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          itemCount: places.length,
-                          itemBuilder: (BuildContext ctxt, int index) {
-                            return new Button(
-                                "Coord: " + places[index]);
-                          }),
-                    )
+                  : Center(
+                      child: Text('Besökta platser: '),
+                    ),
+              Expanded(
+                child: ListView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: 28.0),
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: places.length,
+                    itemBuilder: (BuildContext ctxt, int index) {
+                      return Button("Coord: " + places[index]);
+                    }),
+              )
             ],
           ),
         ),
