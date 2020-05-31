@@ -32,7 +32,7 @@ class CustomDrawer extends StatelessWidget {
                 horizontal: 8,
               ),
               children: <Widget>[
-                Button('Aviseringar'),
+                SwitchButton('Aviseringar'),
                 Button('Konto'),
                 Button('Sekretess'),
                 Button('Säkerhet'),
