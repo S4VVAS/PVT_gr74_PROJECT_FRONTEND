@@ -264,7 +264,7 @@ class _MapPageState extends State<MapPage> {
 
       //user.level.increaseLevel();
     }
-    _firestoreService.updateUser(user);
+    FirestoreService.updateUser(user);
   }
 
   bool hasVisited(Place place) {
