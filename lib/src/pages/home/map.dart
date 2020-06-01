@@ -258,11 +258,9 @@ class _MapPageState extends State<MapPage> {
   void saveAsVisited(Place place) {
     User user = Globals.instance.user;
     HashSet<String> visitedSet = HashSet.from(user.visited);
-    user.increaseLevel();
     if (!visitedSet.contains(place.getPositionStr())) {
+      user.increaseLevel();
       user.visited.add(place.getPositionStr());
-
-      //user.level.increaseLevel();
     }
     FirestoreService.updateUser(user);
   }

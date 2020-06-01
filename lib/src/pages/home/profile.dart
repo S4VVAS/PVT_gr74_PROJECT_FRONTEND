@@ -3,13 +3,13 @@ import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:history_go/src/firestore/firestore_service.dart';
 import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 User user = Globals.instance.user;
 
@@ -34,15 +34,23 @@ class _ProfilePageState extends State<ProfilePage> {
         .then((value) => _initial.complete(value));
   }
 
+  Widget _circularPercentIndicator() {
+    return new CircularPercentIndicator(
+      radius: 260.0,
+      lineWidth: 10.0,
+      percent: user.level/10,
+      center: _profilePicture(),
+      backgroundColor: Colors.grey,
+      progressColor: Colors.blue,
+    );
+  }
+
   Widget _profilePicture() {
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: CircleAvatar(
+      return CircleAvatar(
         radius: 120.0,
         backgroundColor: Colors.transparent,
         backgroundImage: AssetImage('assets/profil.png'),
-      ),
-    );
+      );
   }
 
   Future<void> _getPlaces() async {
@@ -98,9 +106,16 @@ class _ProfilePageState extends State<ProfilePage> {
           color: Theme.of(context).backgroundColor,
           child: Column(
             children: <Widget>[
-              _profilePicture(),
+              _circularPercentIndicator(),
               Center(
-                child: Text('Besökta platser: '),
+                child: Text('Level: ' + user.level.toString()),
+              ),
+              Center(
+                child: Text(user.exp.toString() + ' / ' + user.expCounter + ' XP'),
+              ),
+              Center(
+
+                child: Text('Besökta platser: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               ),
               _initial.isCompleted ?
               Expanded (
