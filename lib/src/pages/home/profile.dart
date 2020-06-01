@@ -22,16 +22,9 @@ class _ProfilePageState extends State<ProfilePage> {
   final FirestoreService _firestoreService = FirestoreService();
   String _message = 'Du har inga besökta platser än, eller så laddas dem!';
 
-  final Completer<DocumentSnapshot> _initial = new Completer();
-
   @override
   void initState() {
     super.initState();
-    Firestore.instance
-        .collection("users")
-        .document(user.id)
-        .get()
-        .then((value) => _initial.complete(value));
   }
 
   Widget _profilePicture() {
@@ -101,11 +94,10 @@ class _ProfilePageState extends State<ProfilePage> {
               _profilePicture(),
               Center(
                 child: Text('Besökta platser: '),
-              ),
-              _initial.isCompleted ? 
+              ), 
               Expanded (
-                child: VisitedList(_initial.future),
-              ) : Expanded(child: Align(child: Text("Loading.."), alignment: Alignment.center,),)
+                child: VisitedList(),
+              ),
             ],
           ),
         ),
@@ -117,12 +109,23 @@ class _ProfilePageState extends State<ProfilePage> {
 //places får korrekta platserna efter api callet i setplacesFromData har körts,
 // så om man gör om VisitedList till en stateful widget och kör setState(() {places.addAll(result) })
 // i getPlacesFromData så borde widgeten byggas om automatiskt och då returnera listviewn med plasterna! :)
-class VisitedList extends StatelessWidget {
-  VisitedList(this._initial) {_initial.then((value) => initialData = value);}
-  Future<DocumentSnapshot> _initial;
+class VisitedList extends StatefulWidget {
+  VisitedList() {Firestore.instance
+        .collection("users")
+        .document(user.id)
+        .get()
+        .then((value) => _initial.complete(value));}
+        
+  final Completer<DocumentSnapshot> _initial = new Completer();
+
+  @override 
+  _VisitedListState createState() => _VisitedListState();
+}
+
+class _VisitedListState extends State<VisitedList> {
   DocumentSnapshot initialData;
 
-  final Completer<Set<Place>> _placeCompleter = new Completer();
+  Completer<Set<Place>> _placeCompleter = new Completer();
   final HashSet<Place> places = new HashSet<Place>();
 
   @override
@@ -164,11 +167,11 @@ class VisitedList extends StatelessWidget {
   Future<void> setPlacesFromData(HashSet<String> coords) async {
     print(coords);
     PlaceRepository().getPlacesFromCoords(coords).then((result) {
-      print("before:" + places.toString());
+      result.forEach((element) {print(element.entries[0].title);});
       print(result.toString);
-      places.addAll(result);
-      _placeCompleter.complete(places);
-      print("after:" + places.toString());
+      setState(() {
+        places.addAll(result);
+      });
     });
   }
 }

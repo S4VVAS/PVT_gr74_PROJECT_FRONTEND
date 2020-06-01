@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -43,9 +44,9 @@ class _MapPageState extends State<MapPage> {
   StreamSubscription positionStream;
   Geolocator _geolocator = Geolocator();
   LocationOptions locationOptions =
-      LocationOptions(accuracy: LocationAccuracy.best, distanceFilter: 5);
+      LocationOptions(accuracy: LocationAccuracy.best, distanceFilter: 1);
 
-  double _zoom = 16.0;
+  double _zoom = 17.0;
 
   @override
   void initState() {
@@ -172,17 +173,15 @@ class _MapPageState extends State<MapPage> {
                     initialCameraPosition: CameraPosition(
                       target: _userPosition,
                       zoom: _zoom,
-                      //tilt: CAMERA_TILT,
-                      //bearing: CAMERA_BEARING,
                     ),
-                    mapType: MapType.normal,
-                    buildingsEnabled: true,
+                    mapType: MapType.none,
                     markers: Set<Marker>.of(markers.values),
                     myLocationButtonEnabled: false,
                     myLocationEnabled: true,
                     zoomControlsEnabled: true,
                     scrollGesturesEnabled: false,
-                    zoomGesturesEnabled: false,
+                    zoomGesturesEnabled: true,
+                    tiltGesturesEnabled: true,
                   ),
                   Padding(
                     padding:
