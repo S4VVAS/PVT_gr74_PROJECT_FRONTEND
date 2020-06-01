@@ -16,6 +16,7 @@ class FirestoreService {
             email: user.email,
             imgUrl: user.photoUrl,
             level: 1,
+            exp: 0,
             visited: new List<String>());
     updateUser(_user);
   }
