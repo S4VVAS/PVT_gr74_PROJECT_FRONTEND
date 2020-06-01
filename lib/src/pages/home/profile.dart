@@ -102,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Center(
                 child: Text('Besökta platser: '),
               ),
-              _initial.isCompleted ? 
+              _initial.isCompleted ?
               Expanded (
                 child: VisitedList(_initial.future),
               ) : Expanded(child: Align(child: Text("Loading.."), alignment: Alignment.center,),)
