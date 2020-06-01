@@ -318,13 +318,18 @@ class _OtherProvidersSignInSectionState
 
   void _signInWithGoogle() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    if(googleUser != null){
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-    _signInHandler('Google', credential);
+      _signInHandler('Google', credential);
+    }else{
+      _setErrorMessage("Google sign in failed.");
+    }
+
   }
 
   void _signInWithFacebook() async {
@@ -358,7 +363,7 @@ class _OtherProvidersSignInSectionState
         await FirestoreService.getUser(fbUser.uid).then((firestoreUser) => {
           if(firestoreUser == null){
             FirestoreService.createUser(fbUser).then((m){
-              print('First time log in for ' + authProvider + " user. Creating Firestore user: " + fbUser.uid);
+              print('First time login for ' + authProvider + " user. Creating Firestore user: " + fbUser.uid);
               setState(() {
                 Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
               });
@@ -372,7 +377,7 @@ class _OtherProvidersSignInSectionState
 
 
       } else {
-        _setErrorMessage('Failed to sign in with $authProvider.');
+        _setErrorMessage('Bad credentials.');
       }
     } on PlatformException catch (e) {
       print(e);
