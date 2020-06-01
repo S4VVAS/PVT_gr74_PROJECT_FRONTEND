@@ -17,7 +17,7 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   //User get currentUser => _currentUser;
   final FirestoreService _firestoreService = FirestoreService();
-  bool _populatedUser = false;
+  bool _isPopulated = false;
 
   @override
   void initState() {
@@ -87,7 +87,7 @@ class _WelcomePageState extends State<WelcomePage> {
           FirebaseUser user = snapshot.data;
           if (user == null) {
             return _welcomePage();
-          }else if (_populatedUser){
+          } else if (_isPopulated) {
             return HomePage();
           } else {
             return Scaffold(
@@ -108,18 +108,23 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future<void> _populateCurrentUser() async {
-    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if (user != null) {
-      await _firestoreService.getUser(user.uid).then((user) {
-        
-        Globals.instance.user = user;
+    final FirebaseUser fbUser = await FirebaseAuth.instance.currentUser();
+    if (fbUser != null) {
+      _firestoreService.getUser(fbUser.uid).then((_user) {
+        if (_user == null) {
+          _firestoreService.createUser(fbUser);
+          _firestoreService.getUser(fbUser.uid).then((_newUser) => _user = _newUser);
+          print("Created user");
+        }
+
+        Globals.instance.user = _user;
         setState(() {
-          _populatedUser = true;
+          _isPopulated = true;
         });
-        print("Populated user " + user.id);
+        print("Populated user ${_user?.id}");
       });
     } else {
-      print('User was NULL. Could not populate user!!');
+      print('Firebase user was NULL. Could not populate user!!');
     }
   }
 }

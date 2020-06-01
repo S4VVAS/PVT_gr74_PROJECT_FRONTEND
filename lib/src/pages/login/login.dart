@@ -165,7 +165,7 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         children: <Widget>[
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'E-postadress'),
             textInputAction: TextInputAction.next,
             keyboardType: TextInputType.emailAddress,
             onFieldSubmitted: (v) {
@@ -173,9 +173,9 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
             },
             validator: (String value) {
               if (value.isEmpty) {
-                return 'Vänligen ange email';
+                return 'Vänligen ange e-postadress';
               } else if (!Validator.validateEmail(value)) {
-                return 'Vänligen ange giltig email';
+                return 'Vänligen ange giltig e-postadress';
               }
               return null;
             },
@@ -360,6 +360,7 @@ class _OtherProvidersSignInSectionState
       assert(!user.isAnonymous);
       assert(await user.getIdToken() != null);
 
+      //Kolla om user finns i firestore annars skapa en för den?
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.uid == currentUser.uid);
       if (user != null) {

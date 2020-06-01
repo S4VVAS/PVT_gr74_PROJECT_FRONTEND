@@ -40,6 +40,59 @@ class Button extends StatelessWidget {
   }
 }
 
+class SwitchButton extends StatefulWidget {
+  SwitchButton(this.text);
+  final String text;
+
+  _SwitchButtonState createState() => _SwitchButtonState();
+}
+
+class _SwitchButtonState extends State<SwitchButton> {
+  _SwitchButtonState();
+
+  bool toggleValue = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: RawMaterialButton(
+        elevation: 4.0,
+        fillColor: Theme.of(context).buttonColor,
+        splashColor: Theme.of(context).buttonColor,
+        onPressed: () {},
+        shape: ContinuousRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        constraints: BoxConstraints(
+          minWidth: 260.0,
+          minHeight: 50.0,
+        ),
+        textStyle: Theme.of(context).textTheme.button,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(width: 40.0, height: 0),
+            Text(widget.text),
+            Switch(
+              value: toggleValue,
+              onChanged: (value) => toggleSwitch(value),
+              activeTrackColor: Colors.lightGreenAccent,
+              activeColor: Colors.lightGreenAccent,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  toggleSwitch(value) {
+    setState(() {
+      toggleValue = value;
+    });
+  }
+}
+
 class SignOutButton extends StatelessWidget {
   SignOutButton({this.text});
   final String text;

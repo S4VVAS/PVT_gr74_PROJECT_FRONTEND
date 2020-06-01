@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+//Borttagen tills vidare
 class SearchPage extends StatelessWidget {
   final Color color = Colors.green;
-
 
   @override
   Widget build(BuildContext context) {

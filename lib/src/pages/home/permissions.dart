@@ -126,3 +126,29 @@ class _PermissionState extends State<PermissionWidget> {
     });
   }
 }
+
+class LocationPermissionHandler {
+  LocationPermissionHandler();
+
+  final Permission _permission = Permission.location;
+  PermissionStatus _status = PermissionStatus.undetermined;
+
+  Future<void> getPermissionStatus() async {
+    askPermission().then((permissionStatus) {
+      _status = permissionStatus;
+      print("Location permission? ${_status.toString()}");
+      if (_status == PermissionStatus.granted) {
+      } else {
+        getPermissionStatus();
+      }
+    });
+  }
+
+  Future<bool> hasPermission() async {
+    return _permission.isGranted;
+  }
+
+  Future<PermissionStatus> askPermission() async {
+    return await _permission.request();
+  }
+}
