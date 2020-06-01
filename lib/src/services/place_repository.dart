@@ -22,11 +22,10 @@ class PlaceRepository {
     return _toApi(_url);
   }
 
-  Future<Set<Place>> getPlacesFromCoords(List<String> coords) {
+  Future<Set<Place>> getPlacesFromCoords(Set<String> coords) async {
     String _url = 'getCoorPlaces?coors=';
     for (int i = 0; i < coords.length; i++) {
-      print(coords[i]);
-      _url += '${coords[i]}' + (i < coords.length - 1 ? ',' : '');
+      _url += '${coords.elementAt(i)}' + (i < coords.length - 1 ? ',' : '');
     }
     return _toApi(_url);
   }
