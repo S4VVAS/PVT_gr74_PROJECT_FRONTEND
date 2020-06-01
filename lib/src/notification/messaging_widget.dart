@@ -1,6 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:history_go/src/notification/Message.dart';
+import 'package:history_go/src/notification/message.dart';
 
 class MessagingWidget extends StatefulWidget {
   @override
