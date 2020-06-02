@@ -20,16 +20,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final FirestoreService _firestoreService = FirestoreService();
-  String _message = 'Du har inga besökta platser än, eller så laddas dem!';
-
-  final Completer<DocumentSnapshot> _initial = new Completer();
-
   Widget _circularPercentIndicator() {
     return new CircularPercentIndicator(
       radius: 260.0,
       lineWidth: 10.0,
-      percent: user.level/10,
+      percent: user.exp/(User.getExpRequiredToLvlUp(user.level)),
       center: _profilePicture(),
       backgroundColor: Colors.grey,
       progressColor: Colors.blue,
@@ -72,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Text('Level: ' + user.level.toString()),
               ),
               Center(
-                child: Text(user.exp.toString() + ' / ' + user.expCounter + ' XP'),
+                child: user.level != 10 ? Text(user.exp.toString() + ' / ' + User.getExpRequiredToLvlUp(user.level).toString() + ' XP') : Text(user.exp.toString() + ' /∞'),
               ),
               Center(
 

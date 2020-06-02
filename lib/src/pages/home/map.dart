@@ -243,7 +243,7 @@ class _MapPageState extends State<MapPage> {
     User user = Globals.instance.user;
     HashSet<String> visitedSet = HashSet.from(user.visited);
     if (!visitedSet.contains(place.getPositionStr())) {
-      user.increaseLevel();
+      user.increaseExp(1);
       user.visited.add(place.getPositionStr());
     }
     FirestoreService.updateUser(user);
