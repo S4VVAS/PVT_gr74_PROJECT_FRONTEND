@@ -35,9 +35,9 @@ class CustomDrawer extends StatelessWidget {
               children: <Widget>[
                 Button.pushRoute('Profil', '/profile'),
                 //Button.pushRoute('Uppdrag', '/missions'),
-                Button('Konto'),
+/*                Button('Konto'),
                 Button('Sekretess'),
-                Button('Säkerhet'),
+                Button('Säkerhet'),*/
                 Button('Aviseringar', onPressed: (){AppSettings.openNotificationSettings();},),
                 Button.pushRoute('Visa behörigheter', '/permissions')
               ],
