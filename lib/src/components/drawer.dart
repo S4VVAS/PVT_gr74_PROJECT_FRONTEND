@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:history_go/src/components/title_logo.dart';
 
 class CustomDrawer extends StatelessWidget {
   CustomDrawer({Key key}) : super(key: key);
@@ -13,12 +14,10 @@ class CustomDrawer extends StatelessWidget {
         children: [
           DrawerHeader(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Text('Inställningar',
-                    style: Theme.of(context).textTheme.headline4,
-                    textAlign: TextAlign.center),
+                WhiteTitleLogo()
               ],
             ),
             decoration: BoxDecoration(

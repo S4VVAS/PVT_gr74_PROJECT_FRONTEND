@@ -150,8 +150,8 @@ class DrawerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 32,
-      width: 32,
+      height: 55,
+      width: 55,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
