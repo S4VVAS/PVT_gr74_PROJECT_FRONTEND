@@ -149,19 +149,19 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Center(
       child: _userPosition == null
-          ? Container(
-              child: Center(
-              child: Column(children: [
-                Text(
-                  'loading map',
-                  style: TextStyle(
-                      fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
-                ),
-                Container(
-                  child: CircularProgressIndicator(),
-                )
-              ]),
-            ))
+          ? Column( 
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+              Text(
+                'laddar karta',
+                style: TextStyle(
+                    fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
+              ),
+              Container(
+                child: CircularProgressIndicator(),
+              )
+            ])
           : Container(
               child: GoogleMap(
                 onMapCreated: (GoogleMapController controller) {

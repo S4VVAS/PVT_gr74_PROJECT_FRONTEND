@@ -43,7 +43,10 @@ class _HomePageState extends State<HomePage> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
-                            DrawerButton(),
+                            Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: DrawerButton(),
+                            )
                           ],
                         ),
                       ),

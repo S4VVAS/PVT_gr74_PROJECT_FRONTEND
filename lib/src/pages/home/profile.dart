@@ -22,9 +22,9 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   Widget _circularPercentIndicator() {
     return new CircularPercentIndicator(
-      radius: 260.0,
+      radius: 180.0,
       lineWidth: 10.0,
-      percent: user.exp/(User.getExpRequiredToLvlUp(user.level)),
+      percent: user.exp / (User.getExpRequiredToLvlUp(user.level)),
       center: _profilePicture(),
       backgroundColor: Colors.grey,
       progressColor: Colors.blue,
@@ -32,11 +32,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _profilePicture() {
-      return CircleAvatar(
-        radius: 120.0,
-        backgroundColor: Colors.transparent,
-        backgroundImage: AssetImage('assets/profil.png'),
-      );
+    return CircleAvatar(
+      radius: 90.0,
+      backgroundColor: Colors.transparent,
+      backgroundImage: AssetImage('assets/profil.png'),
+    );
   }
 
   @override
@@ -44,22 +44,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: CustomAppBar(
         text: "Profil",
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer();
-            },
-          )
-        ],
+        backButton: true,
       ),
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.width,
           color: Theme.of(context).backgroundColor,
+          padding: EdgeInsets.all(8.0),
           child: Column(
             children: <Widget>[
               _circularPercentIndicator(),
@@ -67,15 +58,31 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Text('Level: ' + user.level.toString()),
               ),
               Center(
-                child: user.level != 10 ? Text(user.exp.toString() + ' / ' + User.getExpRequiredToLvlUp(user.level).toString() + ' XP') : Text(user.exp.toString() + ' /∞'),
+                child: user.level != 10
+                    ? Text(user.exp.toString() +
+                        ' / ' +
+                        User.getExpRequiredToLvlUp(user.level).toString() +
+                        ' XP')
+                    : Text(user.exp.toString() + ' /∞'),
               ),
               Center(
-
-                child: Text('Besökta platser: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                child: Text('Besökta platser: ',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               ),
-              //Expanded(
-              //  child: VisitedList(),
-              //), 
+              user.visited.length == 0
+                  ? Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 48.0),
+                      child: Text(
+                        "Du har inte besökt några platser\n"
+                        "Upptäck nya genom att trycka på platser i närheten på kartan, "
+                        "de visas i en annan färg när du är tillräckligt nära!",
+                        textAlign: TextAlign.center,
+                      ))
+                  : Expanded(
+                      child: VisitedList(),
+                    ),
             ],
           ),
         ),
@@ -85,78 +92,77 @@ class _ProfilePageState extends State<ProfilePage> {
 }
 
 class VisitedList extends StatefulWidget {
+  final List<String> coords = user.visited;
+
   @override
   _VisitedListState createState() => _VisitedListState();
 }
 
 class _VisitedListState extends State<VisitedList> {
-  final Completer<Set<Place>> _placeCompleter = new Completer();
-  final HashSet<Place> places = new HashSet<Place>();
+  Completer<Set<Place>> _completer = new Completer();
+  HashSet<Place> _places;
+
+  @override
+  void initState() {
+    super.initState();
+    setPlacesFromData(widget.coords);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance
-            .collection("users").where("id", isEqualTo: user.id).snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return Text('Loading...');
-              break;
-            default:
-              if (snapshot.data.documentChanges.first.type == DocumentChangeType.modified)
-                print(snapshot.data.documentChanges.first.document.data["visited"]);
-              //snapshot.data.documentChanges.forEach((change) { print(change.document.data.toString());});
-              
-              setPlacesFromData(List<String>.from(snapshot.data.documentChanges.first.document.data["visited"]));
-              return _placeCompleter.isCompleted
-                  ? ListView(
-                    children: snapshot.data.documents.map((DocumentSnapshot document) {
-                      return placeTile(document["visited"]);
-                    }).toList()
-                  )
-                  
-                  /* ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 28.0),
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: places.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return placeTile(places.elementAt(index));
-                      },
-                    ) */
-                  : Align(
-                      child: Text("Loading.."),
-                      alignment: Alignment.center,
-                    );
-          }
-        });
+    return _completer.isCompleted
+        ? ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            primary: true,
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: _places.length,
+            itemBuilder: (BuildContext context, int index) {
+              return placeTile(_places.elementAt(index));
+            })
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+                Text(
+                  'laddar besökta platser',
+                  style: TextStyle(
+                      fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
+                ),
+                Container(
+                  child: CircularProgressIndicator(),
+                )
+              ]);
   }
 
   Widget placeTile(Place place) {
     return Container(
-        color: Colors.lightBlue,
-        child: ListTile(
-          contentPadding: EdgeInsets.all(8.0),
-          leading: Container(
-            decoration: BoxDecoration(shape: BoxShape.circle),
-            child: Image.network(
-              place.entries[0].img,
-              filterQuality: FilterQuality.low,
+        margin: EdgeInsets.all(4.0),
+        child: RawMaterialButton(
+            onPressed: () {},
+            elevation: 4.0,
+            fillColor: Theme.of(context).buttonColor,
+            splashColor: Theme.of(context).splashColor,
+            shape: ContinuousRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
             ),
-          ),
-          title: Text(place.entries[0].title),
-          subtitle: Text("${place.entries.length} bilder"),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => InfoPage(place)),
-          ),
-        ));
+            child: ListTile(
+              leading: CircleAvatar(
+                radius: 30.0,
+                backgroundImage: NetworkImage(place.entries[0].img),
+                backgroundColor: Colors.transparent,
+              ),
+              title: Text(place.entries[0].title,
+                  style: Theme.of(context).textTheme.button),
+              subtitle: Text("${place.entries.length} bilder",
+                  style: Theme.of(context).textTheme.caption),
+              trailing: Icon(Icons.keyboard_arrow_right),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => InfoPage(place)),
+              ),
+            )));
   }
 
   Future<void> setPlacesFromData(List<String> coords) async {
@@ -167,7 +173,8 @@ class _VisitedListState extends State<VisitedList> {
       });
       print(result.toString);
       setState(() {
-        places.addAll(result);
+        _completer.complete(result);
+        _places = new HashSet<Place>.from(result);
       });
     });
   }

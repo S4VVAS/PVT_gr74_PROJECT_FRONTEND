@@ -25,7 +25,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   FocusNode focus;
 
-  String _userEmail;
   bool _success;
   String _message = '';
 
@@ -123,7 +122,6 @@ class _SignUpPageState extends State<SignUpPage> {
       if (user != null) {
         setState(() {
           _success = true;
-          _userEmail = user.email;
         });
         await FirestoreService.createUser(user);
       } else {
