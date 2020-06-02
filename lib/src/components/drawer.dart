@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/buttons.dart';
+import 'package:app_settings/app_settings.dart';
 
 class CustomDrawer extends StatelessWidget {
   CustomDrawer({Key key}) : super(key: key);
@@ -37,7 +38,7 @@ class CustomDrawer extends StatelessWidget {
                 Button('Konto'),
                 Button('Sekretess'),
                 Button('Säkerhet'),
-                SwitchButton('Aviseringar'),
+                Button('Aviseringar', onPressed: (){AppSettings.openNotificationSettings();},),
                 Button.pushRoute('Visa behörigheter', '/permissions')
               ],
             ),

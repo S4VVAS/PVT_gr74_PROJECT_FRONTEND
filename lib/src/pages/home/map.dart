@@ -151,13 +151,17 @@ class _MapPageState extends State<MapPage> {
       child: _userPosition == null
           ? Container(
               child: Center(
-                child: Text(
-                  'loading map..',
+              child: Column(children: [
+                Text(
+                  'loading map',
                   style: TextStyle(
                       fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
                 ),
-              ),
-            )
+                Container(
+                  child: CircularProgressIndicator(),
+                )
+              ]),
+            ))
           : Container(
               child: GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
@@ -238,11 +242,9 @@ class _MapPageState extends State<MapPage> {
   void saveAsVisited(Place place) {
     User user = Globals.instance.user;
     HashSet<String> visitedSet = HashSet.from(user.visited);
-    user.increaseLevel();
     if (!visitedSet.contains(place.getPositionStr())) {
+      user.increaseLevel();
       user.visited.add(place.getPositionStr());
-
-      //user.level.increaseLevel();
     }
     FirestoreService.updateUser(user);
   }

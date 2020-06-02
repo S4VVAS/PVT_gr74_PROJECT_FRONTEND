@@ -10,6 +10,7 @@ import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/pages/pages.dart';
 import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 User user = Globals.instance.user;
 
@@ -22,15 +23,25 @@ class _ProfilePageState extends State<ProfilePage> {
   final FirestoreService _firestoreService = FirestoreService();
   String _message = 'Du har inga besökta platser än, eller så laddas dem!';
 
+  final Completer<DocumentSnapshot> _initial = new Completer();
+
+  Widget _circularPercentIndicator() {
+    return new CircularPercentIndicator(
+      radius: 260.0,
+      lineWidth: 10.0,
+      percent: user.level/10,
+      center: _profilePicture(),
+      backgroundColor: Colors.grey,
+      progressColor: Colors.blue,
+    );
+  }
+
   Widget _profilePicture() {
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: CircleAvatar(
+      return CircleAvatar(
         radius: 120.0,
         backgroundColor: Colors.transparent,
         backgroundImage: AssetImage('assets/profil.png'),
-      ),
-    );
+      );
   }
 
   @override
@@ -56,9 +67,16 @@ class _ProfilePageState extends State<ProfilePage> {
           color: Theme.of(context).backgroundColor,
           child: Column(
             children: <Widget>[
-              _profilePicture(),
+              _circularPercentIndicator(),
               Center(
-                child: Text('Besökta platser: '),
+                child: Text('Level: ' + user.level.toString()),
+              ),
+              Center(
+                child: Text(user.exp.toString() + ' / ' + user.expCounter + ' XP'),
+              ),
+              Center(
+
+                child: Text('Besökta platser: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               ),
               //Expanded(
               //  child: VisitedList(),
