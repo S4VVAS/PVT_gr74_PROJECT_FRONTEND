@@ -15,8 +15,6 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  //User get currentUser => _currentUser;
-  final FirestoreService _firestoreService = FirestoreService();
   bool _isPopulated = false;
 
   @override
@@ -81,30 +79,26 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<FirebaseUser>(
-      stream: FirebaseAuth.instance.onAuthStateChanged,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          FirebaseUser user = snapshot.data;
-          if (user == null) {
-            return _welcomePage();
-          } else if (_isPopulated) {
-            return HomePage();
-          } else {
-            return Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
+        stream: FirebaseAuth.instance.onAuthStateChanged,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            FirebaseUser user = snapshot.data;
+            if (user == null) {
+              return _welcomePage();
+            } else if (_isPopulated) {
+              return HomePage();
+            } else {
+              _populateCurrentUser().then((value) {
+                return HomePage();
+              });
+            }
           }
-        } else {
           return Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
             ),
           );
-        }
-      },
-    );
+        });
   }
 
   Future<void> _populateCurrentUser() async {
@@ -112,9 +106,11 @@ class _WelcomePageState extends State<WelcomePage> {
     if (fbUser != null) {
       FirestoreService.getUser(fbUser.uid).then((_user) {
         if (_user == null) {
-          print('User ' + fbUser.uid + ' did not have a firestore space! Creating new space!');
+          print(
+              'User ${fbUser.uid} did not have a firestore space! Creating new space!');
           FirestoreService.createUser(fbUser).then((m) {
-            FirestoreService.getUser(fbUser.uid).then((_newUser) => _user = _newUser);
+            FirestoreService.getUser(fbUser.uid)
+                .then((_newUser) => _user = _newUser);
           });
           assert(_user != null);
         }
