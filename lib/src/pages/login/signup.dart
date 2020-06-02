@@ -125,7 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
           _success = true;
           _userEmail = user.email;
         });
-        await _firestoreService.createUser(user);
+        await FirestoreService.createUser(user);
       } else {
         _success = false;
       }

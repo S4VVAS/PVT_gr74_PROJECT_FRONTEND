@@ -22,7 +22,7 @@ class PlaceRepository {
     return _toApi(_url);
   }
 
-  Future<Set<Place>> getPlacesFromCoords(Set<String> coords) async {
+  Future<HashSet<Place>> getPlacesFromCoords(List coords) async {
     String _url = 'getCoorPlaces?coors=';
     for (int i = 0; i < coords.length; i++) {
       _url += '${coords.elementAt(i)}' + (i < coords.length - 1 ? ',' : '');
@@ -30,14 +30,18 @@ class PlaceRepository {
     return _toApi(_url);
   }
 
-  Future<Set<Place>> _toApi(String _url) async {
-    debugPrint('REQUEST TO API: ' + _url);
-    final _response = await _provider.get(_url);
+  Future<HashSet<Place>> _toApi(String _url) async {
     HashSet<Place> places = new HashSet();
+    debugPrint('REQUEST TO API: ' + _url);
+    try {
+    final _response = await _provider.get(_url);   
     for (var place in _response) {
       places.add(Place.fromJson(place));
     }
     debugPrint("getBoundedPlaces returned ${places.length} places");
+    } catch (e) {
+      print(e);
+    }
 
     return places;
   }

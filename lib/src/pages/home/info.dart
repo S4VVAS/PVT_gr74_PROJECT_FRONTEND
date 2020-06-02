@@ -52,7 +52,9 @@ class _InfoPageState extends State<InfoPage> {
       dotIncreasedColor: Colors.lightBlue,
       dotBgColor: Colors.white.withOpacity(0.0),
       onImageChange: (_, current) => setText(current),
-      showIndicator: (place.entries.length == 1) ? false : true,
+      showIndicator: (place.entries.length == 1 ||
+                      place.entries.length > 15) ?
+                      false : true,
     );
   }
 

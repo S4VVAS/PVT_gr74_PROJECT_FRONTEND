@@ -3,11 +3,11 @@ import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
 import 'package:history_go/src/firestore/firestore_service.dart';
 import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/models/user.dart';
+import 'package:history_go/src/pages/pages.dart';
 import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
 
@@ -22,11 +22,6 @@ class _ProfilePageState extends State<ProfilePage> {
   final FirestoreService _firestoreService = FirestoreService();
   String _message = 'Du har inga besökta platser än, eller så laddas dem!';
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Widget _profilePicture() {
     return Padding(
       padding: EdgeInsets.all(16.0),
@@ -36,36 +31,6 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundImage: AssetImage('assets/profil.png'),
       ),
     );
-  }
-
-  Future<void> _getPlaces() async {
-/*     User user = Globals.instance.user;
-    if (user != null) {
-      print('got user to profilePage: ' + user.toString());
-      //user = await _firestoreService.getUser(user.id);
-      if (user != null) {
-        //Globals.instance.user = user;
-        setState(() {
-          places = user.visited;
-        });
-        print('Gick igenom getPlaces');
-
-        if (places == null) {
-          setState(() {
-            _message = "ditt konto saknar en platslista...ops";
-          });
-          print('User does not have a visited field in firestore...');
-        } else if (places.isEmpty) {
-          setState(() {
-            _message = "Du har inga besökta platser än";
-          });
-        }
-      } else {
-        print('User is null in Getplaces');
-      }
-    } else {
-      print('User is null in Profilpage');
-    } */
   }
 
   @override
@@ -94,10 +59,10 @@ class _ProfilePageState extends State<ProfilePage> {
               _profilePicture(),
               Center(
                 child: Text('Besökta platser: '),
-              ), 
-              Expanded (
-                child: VisitedList(),
               ),
+              //Expanded(
+              //  child: VisitedList(),
+              //), 
             ],
           ),
         ),
@@ -106,68 +71,87 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-//places får korrekta platserna efter api callet i setplacesFromData har körts,
-// så om man gör om VisitedList till en stateful widget och kör setState(() {places.addAll(result) })
-// i getPlacesFromData så borde widgeten byggas om automatiskt och då returnera listviewn med plasterna! :)
 class VisitedList extends StatefulWidget {
-  VisitedList() {Firestore.instance
-        .collection("users")
-        .document(user.id)
-        .get()
-        .then((value) => _initial.complete(value));}
-        
-  final Completer<DocumentSnapshot> _initial = new Completer();
-
-  @override 
+  @override
   _VisitedListState createState() => _VisitedListState();
 }
 
 class _VisitedListState extends State<VisitedList> {
-  DocumentSnapshot initialData;
-
-  Completer<Set<Place>> _placeCompleter = new Completer();
+  final Completer<Set<Place>> _placeCompleter = new Completer();
   final HashSet<Place> places = new HashSet<Place>();
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot>(
+    return StreamBuilder<QuerySnapshot>(
         stream: Firestore.instance
-            .collection("users")
-            .document(user.id)
-            .snapshots(),
-        initialData: initialData,
+            .collection("users").where("id", isEqualTo: user.id).snapshots(),
         builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           }
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
               return Text('Loading...');
+              break;
             default:
-              print(snapshot.data.documentID);
-              print(snapshot.data.data["visited"]);
-              setPlacesFromData(HashSet.from(snapshot.data.data["visited"]));
-              return _placeCompleter.isCompleted ? ListView.builder(
+              if (snapshot.data.documentChanges.first.type == DocumentChangeType.modified)
+                print(snapshot.data.documentChanges.first.document.data["visited"]);
+              //snapshot.data.documentChanges.forEach((change) { print(change.document.data.toString());});
+              
+              setPlacesFromData(List<String>.from(snapshot.data.documentChanges.first.document.data["visited"]));
+              return _placeCompleter.isCompleted
+                  ? ListView(
+                    children: snapshot.data.documents.map((DocumentSnapshot document) {
+                      return placeTile(document["visited"]);
+                    }).toList()
+                  )
+                  
+                  /* ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 28.0),
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
                       itemCount: places.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return ListTile(
-                            title: Text(
-                                "${places.elementAt(index).entries[0].title}"));
+                        return placeTile(places.elementAt(index));
                       },
-                    ):
-                    Align(child: Text("Loading.."), alignment: Alignment.center,);
+                    ) */
+                  : Align(
+                      child: Text("Loading.."),
+                      alignment: Alignment.center,
+                    );
           }
         });
   }
 
-  Future<void> setPlacesFromData(HashSet<String> coords) async {
+  Widget placeTile(Place place) {
+    return Container(
+        color: Colors.lightBlue,
+        child: ListTile(
+          contentPadding: EdgeInsets.all(8.0),
+          leading: Container(
+            decoration: BoxDecoration(shape: BoxShape.circle),
+            child: Image.network(
+              place.entries[0].img,
+              filterQuality: FilterQuality.low,
+            ),
+          ),
+          title: Text(place.entries[0].title),
+          subtitle: Text("${place.entries.length} bilder"),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => InfoPage(place)),
+          ),
+        ));
+  }
+
+  Future<void> setPlacesFromData(List<String> coords) async {
     print(coords);
     PlaceRepository().getPlacesFromCoords(coords).then((result) {
-      result.forEach((element) {print(element.entries[0].title);});
+      result.forEach((element) {
+        print(element.entries[0].title);
+      });
       print(result.toString);
       setState(() {
         places.addAll(result);

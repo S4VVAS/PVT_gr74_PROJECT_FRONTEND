@@ -110,21 +110,23 @@ class _WelcomePageState extends State<WelcomePage> {
   Future<void> _populateCurrentUser() async {
     final FirebaseUser fbUser = await FirebaseAuth.instance.currentUser();
     if (fbUser != null) {
-      _firestoreService.getUser(fbUser.uid).then((_user) {
+      FirestoreService.getUser(fbUser.uid).then((_user) {
         if (_user == null) {
-          _firestoreService.createUser(fbUser);
-          _firestoreService.getUser(fbUser.uid).then((_newUser) => _user = _newUser);
-          print("Created user");
+          print('User ' + fbUser.uid + ' did not have a firestore space! Creating new space!');
+          FirestoreService.createUser(fbUser).then((m) {
+            FirestoreService.getUser(fbUser.uid).then((_newUser) => _user = _newUser);
+          });
+          assert(_user != null);
         }
 
         Globals.instance.user = _user;
+        print("Populated user ${_user?.id}");
         setState(() {
           _isPopulated = true;
         });
-        print("Populated user ${_user?.id}");
       });
     } else {
-      print('Firebase user was NULL. Could not populate user!!');
+      print('Firebase user was null, Could not populate user.');
     }
   }
 }

@@ -144,8 +144,8 @@ class CustomBackButton extends StatelessWidget {
   }
 }
 
-class MapSettingsButton extends StatelessWidget {
-  MapSettingsButton({Key key}) : super(key: key);
+class DrawerButton extends StatelessWidget {
+  DrawerButton({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +170,7 @@ class MapSettingsButton extends StatelessWidget {
         },
         padding: EdgeInsets.zero,
         icon: Icon(
-          Icons.settings,
+          Icons.menu,
           color: Colors.grey[800],
         ),
       ),

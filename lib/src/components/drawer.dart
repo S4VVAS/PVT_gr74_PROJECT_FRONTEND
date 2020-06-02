@@ -32,10 +32,12 @@ class CustomDrawer extends StatelessWidget {
                 horizontal: 8,
               ),
               children: <Widget>[
-                SwitchButton('Aviseringar'),
+                Button.pushRoute('Profil', '/profile'),
+                //Button.pushRoute('Uppdrag', '/missions'),
                 Button('Konto'),
                 Button('Sekretess'),
                 Button('Säkerhet'),
+                SwitchButton('Aviseringar'),
                 Button.pushRoute('Visa behörigheter', '/permissions')
               ],
             ),

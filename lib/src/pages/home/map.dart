@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,7 +8,6 @@ import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/services/globals.dart';
 import 'package:history_go/src/services/place_repository.dart';
-import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/pages/pages.dart';
 
 class MapPage extends StatefulWidget {
@@ -38,13 +35,13 @@ class _MapPageState extends State<MapPage> {
   LatLng _lastCall;
 
   double placeSeenColor = BitmapDescriptor.hueYellow;
-  double placeNearbyColor = BitmapDescriptor.hueRed;
-  double placeNotSeenColor = BitmapDescriptor.hueGreen;
+  double placeNearbyColor = BitmapDescriptor.hueGreen;
+  double placeNotSeenColor = BitmapDescriptor.hueRed;
 
   StreamSubscription positionStream;
   Geolocator _geolocator = Geolocator();
   LocationOptions locationOptions =
-      LocationOptions(accuracy: LocationAccuracy.best, distanceFilter: 1);
+      LocationOptions(accuracy: LocationAccuracy.best, distanceFilter: 3);
 
   double _zoom = 17.0;
 
@@ -162,40 +159,24 @@ class _MapPageState extends State<MapPage> {
               ),
             )
           : Container(
-              child: Stack(
-                children: <Widget>[
-                  GoogleMap(
-                    onMapCreated: (GoogleMapController controller) {
-                      setState(() {
-                        _completer.complete(controller);
-                      });
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: _userPosition,
-                      zoom: _zoom,
-                    ),
-                    mapType: MapType.none,
-                    markers: Set<Marker>.of(markers.values),
-                    myLocationButtonEnabled: false,
-                    myLocationEnabled: true,
-                    zoomControlsEnabled: true,
-                    scrollGesturesEnabled: false,
-                    zoomGesturesEnabled: true,
-                    tiltGesturesEnabled: true,
-                  ),
-                  Padding(
-                    padding:
-                        EdgeInsets.all(8.0) + MediaQuery.of(context).padding,
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: Column(
-                        children: <Widget>[
-                          MapSettingsButton(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              child: GoogleMap(
+                onMapCreated: (GoogleMapController controller) {
+                  setState(() {
+                    _completer.complete(controller);
+                  });
+                },
+                initialCameraPosition: CameraPosition(
+                  target: _userPosition,
+                  zoom: _zoom,
+                ),
+                mapType: MapType.normal,
+                markers: Set<Marker>.of(markers.values),
+                myLocationButtonEnabled: false,
+                myLocationEnabled: true,
+                scrollGesturesEnabled: false,
+                zoomGesturesEnabled: true,
+                zoomControlsEnabled: false,
+                tiltGesturesEnabled: false,
               ),
             ),
     );
@@ -257,10 +238,13 @@ class _MapPageState extends State<MapPage> {
   void saveAsVisited(Place place) {
     User user = Globals.instance.user;
     HashSet<String> visitedSet = HashSet.from(user.visited);
+    user.increaseLevel();
     if (!visitedSet.contains(place.getPositionStr())) {
       user.visited.add(place.getPositionStr());
+
+      //user.level.increaseLevel();
     }
-    _firestoreService.updateUser(user);
+    FirestoreService.updateUser(user);
   }
 
   bool hasVisited(Place place) {

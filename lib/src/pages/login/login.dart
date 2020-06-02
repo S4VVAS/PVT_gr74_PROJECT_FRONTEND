@@ -6,6 +6,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
+import 'package:history_go/src/firestore/firestore_service.dart';
+import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/pages/pages.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -244,8 +246,7 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         _success = true;
         _userEmail = user.email;
         print('Successful login: email: ' + user.toString());
-        Navigator.pushNamedAndRemoveUntil(
-            context, '/home', ModalRoute.withName('/'));
+        Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
       });
     } else
       _success = false;
@@ -317,8 +318,7 @@ class _OtherProvidersSignInSectionState
 
   void _signInWithGoogle() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -352,22 +352,25 @@ class _OtherProvidersSignInSectionState
 
   void _signInHandler(String authProvider, AuthCredential credential) async {
     try {
-      final FirebaseUser user =
-          (await _auth.signInWithCredential(credential)).user;
-
-      assert(user.email != null);
-      assert(user.displayName != null);
-      assert(!user.isAnonymous);
-      assert(await user.getIdToken() != null);
-
-      //Kolla om user finns i firestore annars skapa en för den?
-      final FirebaseUser currentUser = await _auth.currentUser();
-      assert(user.uid == currentUser.uid);
-      if (user != null) {
-        setState(() {
-          Navigator.pushNamedAndRemoveUntil(
-              context, '/home', ModalRoute.withName('/'));
+      await _auth.signInWithCredential(credential);
+      final FirebaseUser fbUser = await _auth.currentUser();
+      if (fbUser != null) {
+        await FirestoreService.getUser(fbUser.uid).then((firestoreUser) => {
+          if(firestoreUser == null){
+            FirestoreService.createUser(fbUser).then((m){
+              print('First time log in for ' + authProvider + " user. Creating Firestore user: " + fbUser.uid);
+              setState(() {
+                Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
+              });
+            })
+          }else{
+            setState(() {
+              Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
+            })
+          }
         });
+
+
       } else {
         _setErrorMessage('Failed to sign in with $authProvider.');
       }
