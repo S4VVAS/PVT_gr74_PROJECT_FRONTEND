@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          Text('or'),
+          Text('eller'),
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
@@ -81,6 +81,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<void> _resetPasswordDialog() {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return ResetPasswordDialog();
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,9 +116,14 @@ class _LoginPageState extends State<LoginPage> {
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 10),
                   alignment: Alignment.centerRight,
-                  child: Text('Forgot Password?',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                  child: InkWell(
+                    onTap: () => _resetPasswordDialog(),
+                    child: Text('Glömt lösenord?',
+                        style: TextStyle(
+                            color: Color(0xfff79c4f),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                  ),
                 ),
                 _divider(),
                 _OtherProvidersSignInSection(),
@@ -169,14 +183,7 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
             onFieldSubmitted: (v) {
               FocusScope.of(context).requestFocus(focus);
             },
-            validator: (String value) {
-              if (value.isEmpty) {
-                return 'Vänligen ange e-postadress';
-              } else if (!Validator.validateEmail(value)) {
-                return 'Vänligen ange giltig e-postadress';
-              }
-              return null;
-            },
+            validator: Validator.validateEmail,
           ),
           TextFormField(
             controller: _passwordController,
@@ -397,5 +404,103 @@ class _OtherProvidersSignInSectionState
 
   void _resetErrorMessage() {
     _setErrorMessage(' ');
+  }
+}
+
+class ResetPasswordDialog extends StatefulWidget {
+  @override
+  _ResetPasswordDialogState createState() => _ResetPasswordDialogState();
+}
+
+class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
+  final _resetKey = GlobalKey<FormState>();
+  final _resetEmailController = TextEditingController();
+  String _resetEmail;
+  String _resetMessage = '';
+
+  Future<bool> _sendResetEmail() async {
+    _resetEmail = _resetEmailController.text;
+
+    if (_resetKey.currentState.validate()) {
+      _resetKey.currentState.save();
+
+      try {
+        await _auth.sendPasswordResetEmail(email: _resetEmail);
+        return true;
+      } catch (e) {
+        setState(() {
+          _resetMessage = e.message;
+        });
+        print(e);
+      }
+      return false;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        "Återställ lösenord",
+        style: TextStyle(color: Colors.black),
+      ),
+      content: SingleChildScrollView(
+        child: Form(
+            key: _resetKey,
+            child: ListBody(
+              children: <Widget>[
+                Text('Ange emailadress kopplat till kontot för att få ett mail med instruktioner för återställning av lösenordet'),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                ),
+                TextFormField(
+                  controller: _resetEmailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: Validator.validateEmail,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Email',
+                    contentPadding: EdgeInsets.only(top: 15.0),
+                  ),
+                  onSaved: (String val) {
+                    _resetEmail = val;
+                  },
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    _resetMessage,
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            )),
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text(
+            'AVBRYT',
+            style: TextStyle(color: Colors.black),
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        FlatButton(
+          child: Text(
+            'OK',
+            style: TextStyle(color: Colors.black),
+          ),
+          onPressed: () {
+            _sendResetEmail().then((value) {
+              if (value) {
+                Navigator.of(context).pop();
+              }
+            });
+          },
+        )
+      ],
+    );
   }
 }

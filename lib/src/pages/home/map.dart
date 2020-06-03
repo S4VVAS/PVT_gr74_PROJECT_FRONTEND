@@ -77,7 +77,7 @@ class _MapPageState extends State<MapPage> {
     }
     if (_lastCall == _userPosition) return false;
     double distance = await distanceBetween(_lastCall, _userPosition);
-    print(distance);
+    print("Distance since last places shown update: $distance m");
     return distance > 150;
   }
 
@@ -88,9 +88,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   void updatePlaces() async {
-    print(this.toDiagnosticsNode().toString() +
-        " \nis mounted:" +
-        this.mounted.toString());
     if (this.mounted) {
       shouldUpdateShownPlaces().then((result) {
         if (result) {
@@ -119,7 +116,7 @@ class _MapPageState extends State<MapPage> {
       _nearbyUserArea = getAreaAroundUser(_userPosition, Size.small);
       HashSet<Place> temp = HashSet.from(
           places.where((p) => _nearbyUserArea.contains(p.position)));
-      print(temp.length);
+      print("Places nearby: ${temp.length}");
       setState(() {
         nearbyPlaces = temp;
       });

@@ -38,78 +38,15 @@ class User {
 
   void increaseExp(int ex) {
     exp += ex;
-    switch (level) {
-      case 1:
-        if (exp >= getExpRequiredToLvlUp(1)) {
-          level++;
-          exp - getExpRequiredToLvlUp(1);
-          if(exp > getExpRequiredToLvlUp(2))
-            increaseExp(0);
-        }
-          break;
-      case 2:
-        if (exp >= getExpRequiredToLvlUp(2)) {
-          level++;
-          exp - getExpRequiredToLvlUp(2);
-          if(exp > getExpRequiredToLvlUp(3))
-            increaseExp(0);
-        }
-        break;
-      case 3:
-        if (exp >= getExpRequiredToLvlUp(3)) {
-          level++;
-          exp - getExpRequiredToLvlUp(3);
-          if(exp > getExpRequiredToLvlUp(4))
-            increaseExp(0);
-        }
-        break;
-      case 4:
-        if (exp >= getExpRequiredToLvlUp(4)) {
-          level++;
-          exp - getExpRequiredToLvlUp(4);
-          if(exp > getExpRequiredToLvlUp(5))
-            increaseExp(0);
-        }
-        break;
-      case 5:
-        if (exp >= getExpRequiredToLvlUp(5)) {
-          level++;
-          exp - getExpRequiredToLvlUp(5);
-          if(exp > getExpRequiredToLvlUp(6))
-            increaseExp(0);
-        }
-        break;
-      case 6:
-        if (exp >= getExpRequiredToLvlUp(6)) {
-          level++;
-          exp - getExpRequiredToLvlUp(6);
-          if(exp > getExpRequiredToLvlUp(7))
-            increaseExp(0);
-        }
-        break;
-      case 7:
-        if (exp >= getExpRequiredToLvlUp(7)) {
-          level++;
-          exp - getExpRequiredToLvlUp(7);
-          if(exp > getExpRequiredToLvlUp(8))
-            increaseExp(0);
-        }
-        break;
-      case 8:
-        if (exp >= getExpRequiredToLvlUp(8)) {
-          level++;
-          exp - getExpRequiredToLvlUp(8);
-          if(exp > getExpRequiredToLvlUp(9))
-            increaseExp(0);
-        }
-        break;
-      case 9:
-        if (exp >= getExpRequiredToLvlUp(9)) {
-          level++;
-          exp - getExpRequiredToLvlUp(9);
-        }
-        break;
+    if (exp >= getExpRequiredToLvlUp(level)) {
+      increaseLevel();
+      increaseExp(0);
     }
+  }
+
+  void increaseLevel() {
+    exp -= getExpRequiredToLvlUp(level);
+    level++;
   }
 
   static int getExpRequiredToLvlUp(int lvl){

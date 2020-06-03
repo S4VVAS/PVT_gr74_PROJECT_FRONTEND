@@ -77,12 +77,7 @@ class _SignUpPageState extends State<SignUpPage> {
             onFieldSubmitted: (v) {
               FocusScope.of(context).requestFocus(focus);
             },
-            validator: (String value) {
-              if (value.isEmpty) {
-                return 'Vänligen ange en email';
-              }
-              return null;
-            },
+            validator: Validator.validateEmail,
           ),
           TextFormField(
             controller: _passwordController,
@@ -221,18 +216,15 @@ class _SignUpPageState extends State<SignUpPage> {
 }
 
 class Validator {
-  static final RegExp regExpPassword =
-      new RegExp(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$");
   static final RegExp regExpEmail = new RegExp(
       r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$");
 
-  static bool validatePassword(String password) {
-    if (password == null) return false;
-    return regExpPassword.hasMatch(password);
-  }
-
-  static bool validateEmail(String email) {
-    if (email == null) return false;
-    return regExpEmail.hasMatch(email);
+  static String validateEmail(String email) {
+    if (email.length == 0)
+      return "Vänligen ange e-postadress";
+    else if (!regExpEmail.hasMatch(email))
+      return "Ogiltig e-postadress";
+    else
+      return null;
   }
 }
