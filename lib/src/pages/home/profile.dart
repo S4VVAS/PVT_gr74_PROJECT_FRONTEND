@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:history_go/src/components/custom_app_bar.dart';
-import 'package:history_go/src/firestore/firestore_service.dart';
 import 'package:history_go/src/models/place.dart';
 import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/pages/pages.dart';

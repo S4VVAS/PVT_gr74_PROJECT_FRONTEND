@@ -50,10 +50,7 @@ class _PermissionPageState extends State<PermissionPage> {
   }
 }
 
-/// Permission widget which displays a permission and allows users to request
-/// the permissions.
 class PermissionWidget extends StatefulWidget {
-  /// Constructs a [PermissionWidget] for the supplied [Permission].
   const PermissionWidget(this._permission);
 
   final Permission _permission;

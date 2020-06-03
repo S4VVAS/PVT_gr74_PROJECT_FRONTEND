@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 class User {
   String name;
   String id;

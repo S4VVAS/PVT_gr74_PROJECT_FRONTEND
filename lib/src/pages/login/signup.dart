@@ -4,11 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/firestore/firestore_service.dart';
-import 'package:history_go/src/models/place.dart';
-import 'package:history_go/src/models/user.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final FirestoreService _firestoreService = FirestoreService();
 
 class SignUpPage extends StatefulWidget {
   SignUpPage({Key key}) : super(key: key);

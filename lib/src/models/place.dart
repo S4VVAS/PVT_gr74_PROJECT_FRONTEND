@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Place {
@@ -32,7 +30,6 @@ class Place {
 
   List<String> getImages() {
     List<String> images = new List();
-    //TODO: catcha bilder?
     this.entries.forEach((entry) {images.add(entry.img);});
     return images;
   }

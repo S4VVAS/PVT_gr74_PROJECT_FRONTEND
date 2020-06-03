@@ -10,7 +10,6 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/missions': (context) => MissionsPage(),
   '/permissions': (context) => PermissionPage(),
   '/profile': (context) => ProfilePage(),
-  '/search': (context) => SearchPage(),
 };
 
 Route unknownRoute(RouteSettings settings) {

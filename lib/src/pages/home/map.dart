@@ -22,7 +22,6 @@ class _MapPageState extends State<MapPage> {
   Completer<GoogleMapController> _completer;
   GoogleMapController _controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  final FirestoreService _firestoreService = FirestoreService();
 
   HashSet<Place> places = new HashSet();
   HashSet<Place> nearbyPlaces = HashSet();

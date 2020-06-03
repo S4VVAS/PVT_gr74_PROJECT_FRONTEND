@@ -7,7 +7,6 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:history_go/src/components/buttons.dart';
 import 'package:history_go/src/components/title_logo.dart';
 import 'package:history_go/src/firestore/firestore_service.dart';
-import 'package:history_go/src/models/user.dart';
 import 'package:history_go/src/pages/pages.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -148,9 +147,6 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
   final TextEditingController _passwordController = TextEditingController();
   FocusNode focus;
 
-  bool _success;
-  String _userEmail;
-
   @override
   void initState() {
     super.initState();
@@ -243,13 +239,11 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
     }
     if (user != null) {
       setState(() {
-        _success = true;
-        _userEmail = user.email;
         print('Successful login: email: ' + user.toString());
-        Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/home', ModalRoute.withName('/'));
       });
-    } else
-      _success = false;
+    }
   }
 
   @override
@@ -318,18 +312,18 @@ class _OtherProvidersSignInSectionState
 
   void _signInWithGoogle() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    if(googleUser != null){
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.getCredential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       _signInHandler('Google', credential);
-    }else{
+    } else {
       _setErrorMessage("Google sign in failed.");
     }
-
   }
 
   void _signInWithFacebook() async {
@@ -361,21 +355,27 @@ class _OtherProvidersSignInSectionState
       final FirebaseUser fbUser = await _auth.currentUser();
       if (fbUser != null) {
         await FirestoreService.getUser(fbUser.uid).then((firestoreUser) => {
-          if(firestoreUser == null){
-            FirestoreService.createUser(fbUser).then((m){
-              print('First time login for ' + authProvider + " user. Creating Firestore user: " + fbUser.uid);
-              setState(() {
-                Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
-              });
-            })
-          }else{
-            setState(() {
-              Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
-            })
-          }
-        });
-
-
+              if (firestoreUser == null)
+                {
+                  FirestoreService.createUser(fbUser).then((m) {
+                    print('First time login for ' +
+                        authProvider +
+                        " user. Creating Firestore user: " +
+                        fbUser.uid);
+                    setState(() {
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/home', ModalRoute.withName('/'));
+                    });
+                  })
+                }
+              else
+                {
+                  setState(() {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/home', ModalRoute.withName('/'));
+                  })
+                }
+            });
       } else {
         _setErrorMessage('Bad credentials.');
       }

@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:history_go/src/services/api_provider.dart';
@@ -34,11 +33,11 @@ class PlaceRepository {
     HashSet<Place> places = new HashSet();
     debugPrint('REQUEST TO API: ' + _url);
     try {
-    final _response = await _provider.get(_url);   
-    for (var place in _response) {
-      places.add(Place.fromJson(place));
-    }
-    debugPrint("getBoundedPlaces returned ${places.length} places");
+      final _response = await _provider.get(_url);
+      for (var place in _response) {
+        places.add(Place.fromJson(place));
+      }
+      debugPrint("getBoundedPlaces returned ${places.length} places");
     } catch (e) {
       print(e);
     }
